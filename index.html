@@ -1,9 +1,198 @@
-<!DOCTYPE html>
-<html>
-<head>
-</head>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>inso</title>
+        <link rel="icon" type="image/x-icon" href="./res/favicon.ico" />
+        <meta
+            name="description"
+            content="The official website for inso, a circle clicker derivative that allows scripts and shaders to manipulate your beatmaps."
+        />
+        <!-- Open Graph / Facebook -->
+        <meta property="og:title" content="inso" />
+        <meta
+            property="og:description"
+            content="The official website for inso, a circle clicker derivative that allows scripts and shaders to manipulate your beatmaps."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://isakvik.github.io/inso/" />
+        <meta property="og:image" content="./res/insooutline.png" />
+        <meta property="og:site_name" content="inso" />
+        <meta property="og:locale" content="en_US" />
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:title" content="inso" />
+        <meta
+            property="twitter:description"
+            content="The official website for inso, a circle clicker derivative that allows scripts and shaders to manipulate your beatmaps."
+        />
+        <meta property="twitter:image" content="/res/insooutline.png" />
+        <link rel="preload" href="./res/OCRA.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        <link rel="preload" href="./res/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        <link rel="stylesheet" href="./res/style.css" />
+        <script src="./res/site.js" defer></script>
+    </head>
+    <body>
+        <div class="container">
+            <section class="main">
+                <div class="main-content">
+                    <div class="main-content-views">
+                        <div class="main-content-home">
+                            <img class="main-content-logo" src="res/insooutline.png" alt="inso" />
+                            <h2>The official website for inso, a circle clicker derivative that allows scripts and shaders to manipulate your beatmaps.</h2>
+                            <div class="home-gallery" aria-label="inso screenshots">
+                                <a href="./images/inso1.png" target="_blank" rel="noopener">
+                                    <img src="./images/inso1.png" alt="inso gameplay screenshot 1" />
+                                </a>
+                                <a href="./images/inso2.png" target="_blank" rel="noopener">
+                                    <img src="./images/inso2.png" alt="inso gameplay screenshot 2" />
+                                </a>
+                                <a href="./images/inso3.png" target="_blank" rel="noopener">
+                                    <img src="./images/inso3.png" alt="inso gameplay screenshot 3" />
+                                </a>
+                                <a href="./images/inso4.png" target="_blank" rel="noopener">
+                                    <img src="./images/inso4.png" alt="inso gameplay screenshot 4" />
+                                </a>
+                            </div>
+                            <h2 class="home-download"><a href="#download">Game download ></a> / <a href="#maps">Map repository ></a></h2>
+                        </div>
+                        <div class="main-content-download" hidden>
+                            <h1>DOWNLOAD</h1>
+                            <p class="download-intro">inso is an osu! clone with Lua and GLSL shader support. <br/>It integrates with existing osu! beatmaps.</p>
 
-<body>
-    index.html
-</body>
+                            <div class="download-options">
+                                <div class="download-option">
+                                    <a class="download-button" href="{{WINDOWS_DOWNLOAD_URL}}" target="_blank" rel="noopener">
+                                        <span class="download-action">DOWNLOAD</span>
+                                        <span class="download-platform">
+                                            <strong>Windows</strong>
+                                            <span class="download-meta">x64 / v{{VERSION}}</span>
+                                        </span>
+                                        <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <use xlink:href="#download-icon"></use>
+                                        </svg>
+                                    </a>
+                                    <div class="download-instructions">
+                                        <h2>SETUP</h2>
+                                        <p>Unzip the archive and add your songs to the <code>songs/</code> folder. Run <code>inso.exe</code> after extracting.</p>
+                                    </div>
+                                </div>
+                                <div class="download-option">
+                                    <a class="download-button" href="{{LINUX_DOWNLOAD_URL}}" target="_blank" rel="noopener">
+                                        <span class="download-action">DOWNLOAD</span>
+                                        <span class="download-platform">
+                                            <strong>Linux</strong>
+                                            <span class="download-meta">x64 / v{{VERSION}}</span>
+                                        </span>
+                                        <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <use xlink:href="#download-icon"></use>
+                                        </svg>
+                                    </a>
+                                    <div class="download-instructions">
+                                        <h2>SETUP</h2>
+                                        <p>Install <code>libasound2</code> and ensure <code>libGL</code> and supported graphics drivers are available.</p>
+                                        <p>Unzip the archive and add your songs to the <code>songs/</code> folder. Run <code>inso</code> after extracting.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>older versions can be found on the <a href="https://github.com/isakvik/inso/releases" target="_blank" rel="noopener">releases page</a>.</p>
+
+                            <div class="download-notes">
+                                <h2>ISSUES</h2>
+                                <p>If you run into problems, ensure you have your latest graphics drivers; they may improve OpenGL support and/or performance.</p>
+                                <p>If the issue persists, please report it on the <a href="https://github.com/isakvik/inso/issues" target="_blank" rel="noopener">GitHub issues page</a>, or in the Discord.
+                            </div>
+                        </div>
+                        <div class="main-content-maps" hidden>
+                            <h1>MAPS</h1>
+                            <div class="map-option">
+                                <a class="download-button" href="./downloads/maps/YEAST3.-.ALL.STAGE.DATAPACK.zip" download>
+                                    <span class="download-action">MAP PACK</span>
+                                    <strong>YEAST3</strong>
+                                    <span class="download-map">ALL STAGE DATAPACK</span>
+                                    <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <use xlink:href="#download-icon"></use>
+                                    </svg>
+                                </a>
+                                <div class="map-description">
+                                    <p>Contains the maps for stages 2-7 of the YEAST3 tournament that ran at COE2026, along with stage -1, a bonus map.</p>
+                                </div>
+                            </div>
+                            <h3>If you have a map to add to the list, please contact us on Discord for now!</h3>
+                        </div>
+                        <div class="main-content-faq" hidden>
+                            <h1>FAQ</h1>
+                            <p>...</p>
+                        </div>
+                        <div class="main-content-documentation" hidden>
+                            <h1>DOCUMENTATION</h1>
+                            <h2>USAGE</h2>
+                            <p>Work in progress for now. Gotta add the Lua docs, program usage, inso metadata docs, LAN tournament mode use, getting started...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nav">
+                <a class="nav-link" href="#">HOME</a>
+                <a class="nav-link" href="#download">DOWNLOAD</a>
+                <a class="nav-link" href="#faq" hidden>FAQ</a>
+                <a class="nav-link" href="#maps">MAPS</a>
+                <a class="nav-link" href="#documentation">DOCS</a>
+                <a class="nav-icon-link nav-github" href="https://github.com/isakvik/inso" target="_blank" rel="noopener">
+                    <div class="blur">
+                        <svg width="var(--logo-size)" height="var(--logo-size)" viewBox="0 -2.5 24 24" fill="var(--source)" aria-hidden="true">
+                            <use xlink:href="#github-logo"></use>
+                        </svg>
+                    </div>
+                    <div class="logo">
+                        <svg width="var(--logo-size)" height="var(--logo-size)" viewBox="0 -2.5 24 24" fill="var(--source)" aria-hidden="true">
+                            <use xlink:href="#github-logo"></use>
+                        </svg>
+                    </div>
+                    <div>SOURCE</div>
+                </a>
+                <a class="nav-icon-link nav-discord" href="https://discord.com/invite/2WrxyQc" target="_blank" >
+                    <div class="blur">
+                        <svg width="var(--logo-size)" height="var(--logo-size)" viewBox="0 -48.5 256 256" fill="var(--discord)">
+                            <use xlink:href="#discord-logo"></use>
+                        </svg>
+                    </div>
+                    <div class="logo">
+                        <svg width="var(--logo-size)" height="var(--logo-size)" viewBox="0 -48.5 256 256" fill="var(--discord)">
+                            <use xlink:href="#discord-logo"></use>
+                        </svg>
+                    </div>
+                    <div class="nav-discord-link">DISCORD</div>
+                </a>
+            </section>
+            <footer>
+                Website © -GN 2026. Thanks to all inso contributors!
+            </footer>
+        </div>
+
+        <svg
+            width="100%"
+            height="100%"
+            style="display: none"
+            preserveAspectRatio="xMidYMid"
+            fill="#000000"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <symbol id="github-logo" viewBox="0 0 24 24">
+                <path d="M2.6,10.59,8.38,4.8l1.69,1.7A2,2,0,0,0,11,8.73v5.54A2,2,0,0,0,10,16a2,2,0,0,0,4,0,2,2,0,0,0-1-1.73V9.41l2.07,2.09A1.17,1.17,0,0,0,15,12a2,2,0,1,0,2-2,1.17,1.17,0,0,0-.5.07L13.93,7.5a2,2,0,0,0-1.15-2.34,2.1,2.1,0,0,0-1.28-.09L9.8,3.38l.79-.78a2,2,0,0,1,2.82,0l8,8a2,2,0,0,1,0,2.82l-8,8a2,2,0,0,1-2.82,0l-8-8A2,2,0,0,1,2.6,10.59Z"/>
+            </symbol>
+            <symbol id="download-icon" viewBox="0 0 24 24">
+                <path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3zM5 19h14v2H5z"/>
+            </symbol>
+            <symbol id="discord-logo">
+                <path
+                    d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z"
+                    fill-rule="nonzero"
+                ></path>
+            </symbol>
+        </svg>
+    </body>
 </html>

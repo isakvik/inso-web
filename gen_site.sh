@@ -7,26 +7,23 @@ GAME_REPO="${GAME_REPO:-isakvik/inso}"
 RELEASE_TAG="${RELEASE_TAG:-}"
 
 rm -rf "$OUT_DIR"
-mkdir -p "$OUT_DIR/downloads" "$OUT_DIR/docs"
+mkdir -p "$OUT_DIR/downloads"
 
 if [[ -z "$RELEASE_TAG" ]]; then
     RELEASE_TAG=$(curl -fsSL "https://api.github.com/repos/$GAME_REPO/releases/latest" \
         | sed -n 's/.*"tag_name" *: *"\([^"]*\)".*/\1/p' | head -1 || true)
 fi
 
-VERSION="${RELEASE_TAG#v}"
+VERSION="${RELEASE_TAG#[vV]}"
+LINUX_DOWNLOAD_URL=
+WINDOWS_DOWNLOAD_URL=
+RELEASE_PAGE_URL=
 
 if [[ -n "$RELEASE_TAG" ]]; then
-    LINUX_ZIP="inso-${VERSION}-linux-x64.zip"
-    WINDOWS_ZIP="inso-${VERSION}-windows-x64.zip"
-    for zip in "$LINUX_ZIP" "$WINDOWS_ZIP"; do
-        if curl -fsSL -o "$OUT_DIR/downloads/$zip" \
-            "https://github.com/$GAME_REPO/releases/download/$RELEASE_TAG/$zip"; then
-            unzip -j -o "$OUT_DIR/downloads/$zip" "docs/lua_api.html" -d "$OUT_DIR/docs" >/dev/null 2>&1 || true
-        else
-            echo "[gen] skipping unavailable asset: $zip"
-        fi
-    done
+    RELEASE_BASE="https://github.com/$GAME_REPO/releases/download/$RELEASE_TAG"
+    LINUX_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-linux-x64.zip"
+    WINDOWS_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-windows-x64.zip"
+    RELEASE_PAGE_URL="https://github.com/$GAME_REPO/releases/tag/$RELEASE_TAG"
 else
     echo "[gen] warning: no release found on $GAME_REPO, downloads stay placeholders"
 fi
@@ -35,7 +32,7 @@ for f in index.html CNAME; do
     [[ -f "$SITE_DIR/$f" ]] && cp "$SITE_DIR/$f" "$OUT_DIR/"
 done
 
-for d in css js images; do
+for d in res images; do
     [[ -d "$SITE_DIR/$d" ]] && cp -r "$SITE_DIR/$d"/. "$OUT_DIR/$d"/
 done
 
@@ -43,12 +40,28 @@ if [[ -d "$SITE_DIR/downloads/maps" ]]; then
     cp -r "$SITE_DIR/downloads/maps" "$OUT_DIR/downloads/maps"
 fi
 
-if [[ -n "$VERSION" ]]; then
-    find "$OUT_DIR" -maxdepth 2 -name "*.html" -exec sed -i "s/{{VERSION}}/$VERSION/g" {} +
+replace_placeholder() {
+    local file="$1"
+    local placeholder="$2"
+    local value="$3"
+
+    value="${value//\\/\\\\}"
+    value="${value//&/\\&}"
+    value="${value//|/\\|}"
+    sed -i "s|$placeholder|$value|g" "$file"
+}
+
+if [[ -n "$RELEASE_TAG" ]]; then
+    while IFS= read -r -d '' file; do
+        replace_placeholder "$file" "{{VERSION}}" "$VERSION"
+        replace_placeholder "$file" "{{LINUX_DOWNLOAD_URL}}" "$LINUX_DOWNLOAD_URL"
+        replace_placeholder "$file" "{{WINDOWS_DOWNLOAD_URL}}" "$WINDOWS_DOWNLOAD_URL"
+        replace_placeholder "$file" "{{RELEASE_PAGE_URL}}" "$RELEASE_PAGE_URL"
+    done < <(find "$OUT_DIR" -type f -name "*.html" -print0)
 fi
 
-echo "[gen] leftover {{VERSION}} placeholders:"
-grep -rl "{{VERSION}}" "$OUT_DIR" 2>/dev/null || true
+echo "[gen] leftover template placeholders:"
+grep -rIlE '\{\{[A-Z_]+\}\}' "$OUT_DIR" 2>/dev/null || true
 
 echo "[gen] -------- artifacts --------"
 du -sh "$OUT_DIR"
