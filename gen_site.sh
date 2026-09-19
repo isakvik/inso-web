@@ -18,12 +18,14 @@ VERSION="${RELEASE_TAG#[vV]}"
 LINUX_DOWNLOAD_URL=
 WINDOWS_DOWNLOAD_URL=
 RELEASE_PAGE_URL=
+LUA_API_ARCHIVE_URL=
 
 if [[ -n "$RELEASE_TAG" ]]; then
     RELEASE_BASE="https://github.com/$GAME_REPO/releases/download/$RELEASE_TAG"
     LINUX_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-linux-x64.zip"
     WINDOWS_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-windows-x64.zip"
     RELEASE_PAGE_URL="https://github.com/$GAME_REPO/releases/tag/$RELEASE_TAG"
+    LUA_API_ARCHIVE_URL="$LINUX_DOWNLOAD_URL"
 else
     echo "[gen] warning: no release found on $GAME_REPO, downloads stay placeholders"
 fi
@@ -32,9 +34,17 @@ for f in index.html CNAME; do
     [[ -f "$SITE_DIR/$f" ]] && cp "$SITE_DIR/$f" "$OUT_DIR/"
 done
 
-for d in res images; do
+for d in res images docs; do
     [[ -d "$SITE_DIR/$d" ]] && cp -r "$SITE_DIR/$d"/. "$OUT_DIR/$d"/
 done
+
+if [[ -n "$LUA_API_ARCHIVE_URL" ]]; then
+    release_archive=$(mktemp)
+    trap 'rm -f "$release_archive"' EXIT
+    echo "[gen] fetching generated lua docs"
+    curl -fsSL "$LUA_API_ARCHIVE_URL" -o "$release_archive"
+    unzip -p "$release_archive" docs/lua_api.html > "$OUT_DIR/docs/lua_api.html"
+fi
 
 if [[ -d "$SITE_DIR/downloads/maps" ]]; then
     cp -r "$SITE_DIR/downloads/maps" "$OUT_DIR/downloads/maps"
