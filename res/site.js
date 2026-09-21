@@ -1,4 +1,4 @@
-const setupSectionNavigation = ({ sectionSelector, linkSelector, sectionClassPrefix, defaultSection }) => {
+const setupSectionNavigation = ({ sectionSelector, linkSelector, rootLinkSelector, sectionClassPrefix, defaultSection }) => {
     const contentSections = [...document.querySelectorAll(sectionSelector)];
 
     if (!contentSections.length) {
@@ -6,6 +6,7 @@ const setupSectionNavigation = ({ sectionSelector, linkSelector, sectionClassPre
     }
 
     const links = [...document.querySelectorAll(linkSelector)];
+    const rootLink = rootLinkSelector ? document.querySelector(rootLinkSelector) : null;
     const contentTransitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180;
     let currentSection;
     let enterFrame;
@@ -22,6 +23,14 @@ const setupSectionNavigation = ({ sectionSelector, linkSelector, sectionClassPre
                 link.setAttribute("aria-current", "page");
             } else {
                 link.removeAttribute("aria-current");
+            }
+        }
+
+        if (rootLink) {
+            if (name === defaultSection) {
+                rootLink.setAttribute("aria-current", "page");
+            } else {
+                rootLink.removeAttribute("aria-current");
             }
         }
     };
@@ -109,6 +118,7 @@ setupSectionNavigation({
 setupSectionNavigation({
     sectionSelector: ".docs-content-views > section",
     linkSelector: '.docs-nav-link[href^="#"]',
+    rootLinkSelector: ".docs-tree-root",
     sectionClassPrefix: "docs-content",
     defaultSection: "overview",
 });

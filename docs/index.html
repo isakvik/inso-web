@@ -20,11 +20,14 @@
                     <a class="docs-tree-root" href="./">inso_docs/</a>
                     <nav class="docs-tree-nav" aria-label="documentation sections">
                         <a class="docs-nav-link" href="#getting-started">getting started</a>
-                        <a class="docs-nav-link" href="#command-line">command line</a>
+                        <a class="docs-nav-link" href="#metadata">inso file format</a>
                         <a class="docs-nav-link" href="#lan-tournament">tournament mode</a>
-                        <a class="docs-nav-link" href="#metadata">inso metadata</a>
-                        <a href="./lua_api.html"><svg class="docs-file-icon" viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#file-icon"></use></svg>lua api</a>
+                        <a class="docs-nav-link" href="#command-line">command reference</a>
+                        <a class="docs-nav-link" href="#shader-guide">shader guide</a>
+                        <a class="docs-nav-link" href="#lua-guide">lua guide</a>
+                        <a href="./lua_api.html"><svg class="docs-file-icon" viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#file-icon"></use></svg>lua_api.html</a>
                     </nav>
+                    <a class="docs-home" href="../">&lt; HOME</a>
                 </aside>
 
                 <main class="docs-content">
@@ -32,7 +35,31 @@
 
                         <section class="docs-content-getting-started" id="getting-started" hidden>
                             <h2 class="docs-path"><a class="docs-path-root" href="./">documentation</a><span class="docs-path-separator">/</span><strong>getting started</strong></h2>
-                            <p>unzip the latest release, add your songs to the <code>songs/</code> folder, and run inso. maps can be opened with the open external button.</p>
+                            <p>inso opens existing osu! beatmaps and adds lua scripting, custom shaders, and map-specific assets. start with a normal <code>.osu</code> map, then add the inso files you need.</p>
+
+                            <h3>install inso</h3>
+                            <p>download the <a href="https://github.com/isakvik/inso/releases/latest" target="_blank" rel="noopener">latest release</a> and extract it somewhere you can write to.</p>
+                            <ul>
+                                <li>on windows, add maps to the extracted <code>songs/</code> folder and run <code>inso.exe</code>.</li>
+                                <li>on linux, install <code>libasound2</code> and make sure <code>libGL</code> and a supported graphics driver are available. add maps to <code>songs/</code> and run <code>inso</code>.</li>
+                            </ul>
+                            <p>run inso from its extracted folder. the game looks for <code>songs/</code>, <code>skins/</code>, and <code>shaders/</code> relative to the working directory.</p>
+
+                            <h3>open a map</h3>
+                            <p>put a mapset directly under <code>songs/</code>. inso finds the <code>.osu</code> files in that folder and loads the rest of the mapset, including nested assets, when you open it.</p>
+                            <p>maps and skins outside the normal folders can be opened with the <strong>open external</strong> button below their dropdowns. press <code>ctrl+f5</code> after adding files while inso is running to refresh the map and skin lists.</p>
+
+                            <h3>map author workflow</h3>
+                            <p>make the map in stable, open it in inso with <strong>open external</strong>, and keep the map folder open in your editor. relevant changes are watched while the map is open: lua scripts and shaders reload, while map and asset changes reopen the beatmap.</p>
+                            <pre><code>songs/
+  my-map/
+    my-map.osu
+    my-map.inso
+    main.lua
+    background.fs.glsl
+    textures/
+    audio/</code></pre>
+                            <p>the <code>.inso</code> file connects the map to its lua entry point, shaders, render targets, and other resources. see <a href="#metadata">inso file format</a>, the <a href="#shader-guide">shader guide</a>, and the <a href="#lua-guide">lua guide</a> to start integrating them.</p>
                         </section>
 
                         <section class="docs-content-overview" id="overview">
@@ -41,44 +68,576 @@
                             <div class="docs-card-list">
                                 <a class="docs-card" href="#getting-started">
                                     <strong>GETTING STARTED</strong>
-                                    <span>set up inso and open your first map.</span>
+                                    <span>install inso, open a map, and start authoring.</span>
                                 </a>
-                                <a class="docs-card" href="#command-line">
-                                    <strong>COMMAND LINE</strong>
-                                    <span>available inso.exe flags and their effects.</span>
+                                <a class="docs-card" href="#metadata">
+                                    <strong>inso file format</strong>
+                                    <span>configure map behavior with an .inso file.</span>
                                 </a>
                                 <a class="docs-card" href="#lan-tournament">
                                     <strong>LAN TOURNAMENT MODE</strong>
                                     <span>run synchronized play across multiple clients.</span>
                                 </a>
+                                <a class="docs-card" href="#command-line">
+                                    <strong>COMMAND REFERENCE</strong>
+                                    <span>available inso.exe flags and their effects.</span>
+                                </a>
+                                <a class="docs-card" href="#shader-guide">
+                                    <strong>SHADER INTEGRATION</strong>
+                                    <span>register pipelines, draw custom effects, and build post-processing.</span>
+                                </a>
+                                <a class="docs-card" href="#lua-guide">
+                                    <strong>LUA INTEGRATION</strong>
+                                    <span>connect scripts to events, hitobjects, drawables, and map time.</span>
+                                </a>
                                 <a class="docs-card" href="./lua_api.html">
                                     <strong>LUA API</strong>
                                     <span>the api reference generated directly from the game.</span>
-                                </a>
-                                <a class="docs-card" href="#metadata">
-                                    <strong>INSO METADATA</strong>
-                                    <span>configure map behavior with an .inso file.</span>
                                 </a>
                             </div>
                         </section>
 
                         <section class="docs-content-command-line" id="command-line" hidden>
-                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>command-line</strong></h2>
-                            <p>the command-line reference will be expanded here. for now, the main flags are documented in the game readme.</p>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>command line</strong></h2>
+                            <p>the game accepts a small set of startup flags. unknown flags are ignored, and there is no separate help flag.</p>
+
+                            <h3>inso</h3>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">flag</th><th scope="col">effect</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>--tournament [path]</code></th><td>starts the tournament client. an optional map or song folder path can be loaded at startup.</td></tr>
+                                        <tr><th scope="row"><code>--gen-lua-docs</code></th><td>regenerates <code>docs/lua_api.html</code> and exits. run it from the inso folder so the output is written to the expected location.</td></tr>
+                                        <tr><th scope="row"><code>--disable-raw-input</code></th><td>disables raw input for the process. this can help when debugging with tools that do not handle raw input correctly.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3>edit mode keys</h3>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">key</th><th scope="col">action</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>escape</code> / <code>space</code></th><td>pause or resume playback</td></tr>
+                                        <tr><th scope="row"><code>left</code> / <code>right</code></th><td>scrub backward or forward by one grid step</td></tr>
+                                        <tr><th scope="row"><code>ctrl+left</code> / <code>ctrl+right</code></th><td>jump to the previous or next bookmark</td></tr>
+                                        <tr><th scope="row"><code>ctrl+o</code></th><td>open a beatmap file</td></tr>
+                                        <tr><th scope="row"><code>ctrl+c</code></th><td>copy the playhead time in milliseconds</td></tr>
+                                        <tr><th scope="row"><code>ctrl+shift+c</code></th><td>copy the playhead as an osu-style <code>mm:ss:mmm</code> timestamp</td></tr>
+                                        <tr><th scope="row"><code>ctrl+v</code></th><td>jump to the <code>mm:ss:mmm</code> timestamp in the clipboard</td></tr>
+                                        <tr><th scope="row"><code>f5</code></th><td>enter play mode from the current playhead</td></tr>
+                                        <tr><th scope="row"><code>shift+f5</code></th><td>enter play mode from the first hitobject's preempt window</td></tr>
+                                        <tr><th scope="row"><code>r</code></th><td>soft reload the current beatmap</td></tr>
+                                        <tr><th scope="row"><code>shift+r</code></th><td>reload the beatmap and its assets</td></tr>
+                                        <tr><th scope="row"><code>z</code></th><td>jump to the first hitobject, or to the map start if already there</td></tr>
+                                        <tr><th scope="row"><code>home</code></th><td>reset playback rate to 1x</td></tr>
+                                        <tr><th scope="row"><code>pageup</code> / <code>pagedown</code></th><td>speed up or slow down playback</td></tr>
+                                        <tr><th scope="row">mouse scroll</th><td>scrub along the beat grid</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>the broadcaster used for synchronized play is documented in <a href="#lan-tournament">tournament mode</a>.</p>
                         </section>
 
                         <section class="docs-content-lan-tournament" id="lan-tournament" hidden>
-                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>lan-tournament</strong></h2>
-                            <p>the tournament client waits for a start packet from <code>inso_lan_broadcast</code>, allowing several clients to begin a map together.</p>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>tournament mode</strong></h2>
+                            <p>tournament mode lets several inso clients begin the same map together. it is intended for lan events, recordings, and streams where each display needs to stay in sync.</p>
+
+                            <h3>start the clients</h3>
+                            <p>on each computer, open the same map and start the client in tournament mode:</p>
+                            <pre><code>inso --tournament songs/my-map/</code></pre>
+                            <p>the map is loaded and prepared before the start signal arrives. each client listens for udp packets on port <code>8727</code>. the optional path can be omitted when the client should use its normal startup selection.</p>
+
+                            <h3>send a start signal</h3>
+                            <p>run <code>inso_lan_broadcast</code> on a computer that can reach the clients:</p>
+                            <pre><code>inso_lan_broadcast start
+inso_lan_broadcast start 192.168.1.255 500</code></pre>
+                            <p>the default target is <code>255.255.255.255</code> and the default wait is <code>250</code> ms. the wait gives the packet time to reach every client before the start is scheduled. a signal is sent four times with a short gap between packets so one lost packet does not stop the event.</p>
+                            <p>clients begin from a three-second lead-in, then use a shared wall clock while the audio follows it. this keeps separate displays aligned without making normal solo play depend on the network.</p>
+
+                            <h3>abort a map</h3>
+                            <pre><code>inso_lan_broadcast abort
+inso_lan_broadcast abort 192.168.1.255</code></pre>
+                            <p>an abort cancels a start that has not fired yet. after a map has started, it reloads and rearms the map so the clients can prepare for another attempt.</p>
+                            <p>for a local fallback, press <code>ctrl+enter</code> on a waiting client. this starts that client without sending a network signal, so it is useful for testing but not for synchronizing a group.</p>
                         </section>
 
                         <section class="docs-content-metadata" id="metadata" hidden>
-                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>metadata</strong></h2>
-                            <p>metadata reference will be added here. map authors can use an <code>.inso</code> file to configure scripts, shaders, and other map behavior.</p>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>inso file format</strong></h2>
+                            <p>an <code>.inso</code> file adds inso-specific behavior to an osu! mapset. it is a plain text file with colon-separated values and named entries.</p>
+                            <pre><code>inso file format v1
+
+[General]
+LuaEntryPoint: main.lua
+Backbuffer: 1
+
+[Shaders]
+[[background]]
+VertexShader: builtin.quad
+FragmentShader: background.fs.glsl
+BlendMode: Alpha</code></pre>
+                            <p>all sections are optional. filenames and resource names are resolved from the mapset folder. the sections can be used together to build a scripted map, a post-processing chain, or a map that only changes gameplay settings.</p>
+
+                            <h3>general</h3>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">key</th><th scope="col">description</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>LuaEntryPoint</code></th><td>the lua file to run for the map. use a filename such as <code>main.lua</code>; paths are not accepted.</td></tr>
+                                        <tr><th scope="row"><code>BackgroundPipeline</code></th><td>the shader pipeline used for the map background.</td></tr>
+                                        <tr><th scope="row"><code>DoubleMouse</code></th><td>a non-zero value enables the special dual-mouse input mode.</td></tr>
+                                        <tr><th scope="row"><code>Backbuffer</code></th><td>a non-zero value enables a full-frame backbuffer that can be sampled by post-processing passes.</td></tr>
+                                        <tr><th scope="row"><code>FixedUpdateRate</code></th><td>the lua fixed-update frequency in hz. values at or below zero use the default rate of 120 hz.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3>force settings</h3>
+                            <p><code>[ForceSettings]</code> applies selected user settings for the lifetime of the map. the user's own values are restored when the map closes and forced values are not written to <code>user.ini</code>.</p>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">key</th><th scope="col">description</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>window_mode</code></th><td><code>fullscreen</code>, <code>borderless_fullscreen</code>, or <code>windowed</code></td></tr>
+                                        <tr><th scope="row"><code>bg_dim</code></th><td>background dim amount from <code>0</code> to <code>1</code></td></tr>
+                                        <tr><th scope="row"><code>skin_path</code></th><td>skin folder to use. a folder relative to the mapset is accepted.</td></tr>
+                                        <tr><th scope="row"><code>playfield_border_opacity</code></th><td>playfield border opacity from <code>0</code> to <code>1</code></td></tr>
+                                        <tr><th scope="row"><code>cursor_size_multiplier</code></th><td>positive cursor size multiplier</td></tr>
+                                        <tr><th scope="row"><code>snaking_in_sliders_enabled</code></th><td>enable or disable slider body snaking during approach</td></tr>
+                                        <tr><th scope="row"><code>snaking_out_sliders_enabled</code></th><td>enable or disable slider body retraction at the end of a slider</td></tr>
+                                        <tr><th scope="row"><code>hitsound_volume_follows_music</code></th><td>enable or disable hitsound volume following the music volume</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>boolean values are written as <code>1</code>, <code>true</code>, <code>0</code>, or <code>false</code>.</p>
+
+                            <h3>shaders</h3>
+                            <p>each <code>[[name]]</code> entry declares a pipeline that scripts can use by name. shader paths are relative to the mapset unless they name a built-in shader.</p>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">key</th><th scope="col">description</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>VertexShader</code></th><td>vertex shader filename or <code>builtin.quad</code>, <code>builtin.slider</code>, or <code>builtin.text</code></td></tr>
+                                        <tr><th scope="row"><code>FragmentShader</code></th><td>fragment shader filename or <code>builtin.quad</code>, <code>builtin.slider</code>, <code>builtin.slider_present</code>, or <code>builtin.text</code></td></tr>
+                                        <tr><th scope="row"><code>BlendMode</code></th><td><code>None</code>, <code>Alpha</code>, <code>Additive</code>, <code>Max</code>, <code>Premultiplied</code>, or <code>PremultipliedOver</code></td></tr>
+                                        <tr><th scope="row"><code>DepthWrite</code></th><td>depth writes are disabled by default. set this to a non-zero value to enable them.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3>buffers</h3>
+                            <p>each named buffer can load a file-backed model or allocate a writable buffer. <code>Source</code> takes precedence when both keys are present.</p>
+                            <pre><code>[Buffers]
+[[my_model]]
+Source: crate.gltf
+
+[[scratch]]
+Size: 4096</code></pre>
+                            <p><code>Size</code> is measured in bytes. buffers can then be referenced from lua and custom shaders.</p>
+
+                            <h3>render targets</h3>
+                            <p>render targets provide named off-screen textures for custom drawables and post-processing.</p>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">key</th><th scope="col">values</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>Format</code></th><td><code>rgba8</code> or <code>rgba16f</code>. the default is <code>rgba8</code>.</td></tr>
+                                        <tr><th scope="row"><code>Filter</code></th><td><code>linear</code> or <code>nearest</code>. the default is <code>linear</code>.</td></tr>
+                                        <tr><th scope="row"><code>Size</code></th><td><code>N%</code> tracks the window size, while <code>WxH</code> creates a fixed-size target.</td></tr>
+                                        <tr><th scope="row"><code>Scale</code></th><td>legacy scale value. prefer <code>Size: N%</code> for new maps.</td></tr>
+                                        <tr><th scope="row"><code>Depth</code></th><td>depth is disabled by default. set this to a non-zero value to enable it.</td></tr>
+                                        <tr><th scope="row"><code>ClearEveryFrame</code></th><td>the target is cleared every frame unless the value is <code>0</code>.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>the reserved <code>backbuffer</code> and <code>screen</code> targets are available to post-processing passes when <code>Backbuffer: 1</code> is enabled.</p>
+
+                            <h3>hitobject extra bits</h3>
+                            <p>assign script-readable bit flags to hitobjects by their exact start time:</p>
+                            <pre><code>[HitObjectExtraBits]
+1000,0x01
+1500,0b1010
+2000,4</code></pre>
+                            <p>values can be decimal, hexadecimal, or binary. lua filtering safely supports up to 53 bits (every Lua number literal becomes a floating point number).</p>
+                        </section>
+
+                        <section class="docs-content-shader-guide" id="shader-guide" hidden>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>shader guide</strong></h2>
+                            <p>custom shaders are map resources. declare a pipeline in the <code>.inso</code> file, then select it from lua or attach it to a post-processing pass.</p>
+
+                            <h2>the integration loop</h2>
+                            <p>shader work in inso usually has three parts:</p>
+                            <ol>
+                                <li>declare a named shader pipeline in <a href="#metadata">inso metadata</a>.</li>
+                                <li>write a vertex and fragment shader using the interface for the pipeline you are replacing.</li>
+                                <li>create an <code>Element</code>, <code>Drawable</code>, or post pass that refers to the pipeline by name.</li>
+                            </ol>
+                            <p>shader files and map assets are watched while a map is open, so a compileable edit is picked up without restarting the game.</p>
+
+                            <h2>a first quad shader</h2>
+                            <p>the built-in quad vertex shader already creates a quad, applies transforms, and passes texture coordinates to the fragment shader. start by registering a fragment shader with <code>builtin.quad</code>:</p>
+                            <pre><code>[General]
+LuaEntryPoint: main.lua
+
+[Shaders]
+[[wave]]
+VertexShader: builtin.quad
+FragmentShader: wave.fs.glsl
+BlendMode: Alpha</code></pre>
+                            <p>the name <code>wave</code> is a map-local pipeline name. it is not the filename, and it is the name used by <code>Element:set_shader</code>.</p>
+
+                            <p>here is a complete fragment shader that tints a map texture with a moving wave:</p>
+                            <pre><code>#version 460
+#ifdef BINDLESS
+#extension GL_ARB_bindless_texture : require
+
+layout(binding = 4, std430) readonly buffer textureHandles {
+    sampler2DArray textures[];
+};
+#else
+uniform sampler2DArray textures[16];
+#endif
+
+layout(std140, binding = 3) uniform globalData {
+    mat3 t;
+    mat3 playfieldTransform;
+    float time;
+    float circleSizeOsupx;
+    vec2 cursorPos;
+    vec2 resolution;
+};
+
+in vec3 uv;
+in vec4 color;
+flat in uint texIndex;
+
+out vec4 frag_color;
+
+void main() {
+    vec4 base = texture(textures[texIndex], uv) * color;
+    float wave = 0.5 + 0.5 * sin(uv.y * 40.0 + time * 0.004);
+    frag_color = base * vec4(0.8 + wave * 0.2, 0.9, 1.0, 1.0);
+}</code></pre>
+                            <p>the bindless and non-bindless branches are both required. inso tries the bindless variant when the graphics driver supports it and falls back to the array of sampler uniforms otherwise.</p>
+
+                            <p>select the pipeline from lua and put it on a drawable:</p>
+                            <pre><code>function on_init()
+    local image = Element.new("background.png")
+        :set_shader("wave")
+
+    Drawable.new(image, 0, 999999, Layer.BACKGROUND)
+        :set_fullscreen(true)
+end</code></pre>
+                            <p><code>Element.new()</code> without a texture creates a white quad. use a mapset texture name when the shader should process an image. <code>set_fullscreen</code> makes the drawable track the render target size.</p>
+
+                            <h2>engine-provided inputs</h2>
+                            <p>the global uniform block is bound at <code>3</code>. the most useful values for ordinary effects are music time, cursor position, and the current window resolution:</p>
+                            <pre><code>layout(std140, binding = 3) uniform globalData {
+    mat3 t;
+    mat3 playfieldTransform;
+    float time;
+    float circleSizeOsupx;
+    vec2 cursorPos;
+    vec2 resolution;
+};</code></pre>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">value</th><th scope="col">meaning</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>time</code></th><td>current music time in milliseconds</td></tr>
+                                        <tr><th scope="row"><code>cursorPos</code></th><td>cursor position in playfield coordinates</td></tr>
+                                        <tr><th scope="row"><code>resolution</code></th><td>window size in pixels</td></tr>
+                                        <tr><th scope="row"><code>playfieldTransform</code></th><td>the current playfield transform matrix</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h2>parameters from lua</h2>
+                            <p><code>Shader.set_param</code> writes one of 64 shared float slots. <code>Shader.set_vec4</code> writes one of 16 shared vector slots. the buffer is shared by every shader, so reserve indices for each effect instead of letting unrelated effects overwrite each other.</p>
+                            <pre><code>layout(std140, binding = 7) uniform UserParams {
+    vec4 params[16];
+};
+
+#define INTENSITY params[0].x
+
+void main() {
+    vec4 base = texture(textures[texIndex], uv) * color;
+    frag_color = vec4(base.rgb * INTENSITY, base.a);
+}</code></pre>
+                            <pre><code>function on_init()
+    Shader.set_param(0, 0.75)
+    Shader.set_vec4(1, 1.0, 0.4, 0.2, 1.0)
+end</code></pre>
+                            <p>float index <code>13</code> is stored in <code>params[3].y</code>, for example. use <code>index / 4</code> for the vector and <code>index % 4</code> for its component when mapping individual float slots.</p>
+
+                            <h2>post-processing</h2>
+                            <p>post passes are fullscreen draws that sample a render target and write to another one. capture the layers you want, declare the intermediate targets, then queue the passes from <code>on_init</code>.</p>
+                            <pre><code>[General]
+LuaEntryPoint: main.lua
+Backbuffer: 1
+
+[Shaders]
+[[blur]]
+VertexShader: builtin.quad
+FragmentShader: blur.fs.glsl
+BlendMode: None
+
+[[present]]
+VertexShader: builtin.quad
+FragmentShader: present.fs.glsl
+BlendMode: None
+
+[RenderTargets]
+[[blurred]]
+Size: 50%</code></pre>
+                            <pre><code>function on_init()
+    Beatmap.capture_layers("scene", {
+        Layer.BACKGROUND,
+        Layer.FOREGROUND,
+        Layer.HITOBJECTS,
+        Layer.UI,
+        Layer.CURSOR
+    })
+
+    Beatmap.add_post_pass{
+        shader = "blur",
+        src = "scene",
+        dst = "blurred",
+        after = Layer.TOP
+    }
+
+    Beatmap.add_post_pass{
+        shader = "present",
+        src = "blurred",
+        dst = "screen",
+        after = Layer.TOP
+    }
+end</code></pre>
+                            <p>a post shader reads the source slots through the block at binding <code>14</code>:</p>
+                            <pre><code>layout(std140, binding = 14) uniform PostParams {
+    uvec4 srcSlots;
+};</code></pre>
+                            <p><code>srcSlots.x</code> is the first source, <code>srcSlots.y</code> is the second, and so on. a pass can receive up to four sources. <code>backbuffer</code> is the full-frame capture and requires <code>Backbuffer: 1</code>; <code>screen</code> is the real window destination.</p>
+                            <p>post passes should normally run after <code>Layer.TOP</code>. the platform layer is reserved for overlays that must stay above the post-processed image.</p>
+
+                            <h2>custom mesh shaders</h2>
+                            <p>mesh shaders use a model buffer instead of the quad batch. declare the model and a depth-enabled target in the map file:</p>
+                            <pre><code>[Shaders]
+[[mesh]]
+VertexShader: mesh.vs.glsl
+FragmentShader: mesh.fs.glsl
+DepthWrite: 1
+
+[Buffers]
+[[my_model]]
+Source: crate.gltf
+
+[RenderTargets]
+[[mesh_scene]]
+Depth: 1</code></pre>
+                            <p>attach the buffer and target to an element, then composite the target back into the normal 2d layers:</p>
+                            <pre><code>function on_init()
+    local model = Element.new()
+        :set_shader("mesh")
+        :set_mesh("my_model")
+        :set_render_target("mesh_scene")
+
+    Drawable.new(model, 0, 999999, Layer.FOREGROUND)
+
+    local composite = Element.new()
+        :set_tex("mesh_scene")
+
+    Drawable.new(composite, 0, 999999, Layer.OVERLAY)
+        :set_fullscreen(true)
+end</code></pre>
+                            <p>2d quads use a flat depth plane, so a 3d mesh should render into its own depth-cleared target instead of competing with the normal playfield depth buffer. mesh vertices must match the packed buffer layout used by the loader.</p>
+
+                            <h2>validate before sharing</h2>
+                            <p>custom shaders that compile on one gpu can still fail elsewhere. run the bundled validator against the map directory:</p>
+                            <pre><code>build/validate_shaders songs</code></pre>
+                            <p>the validator checks the declared shader pairs with and without bindless textures. before shipping a map:</p>
+                            <ul>
+                                <li>keep uniform values in ordinary variables, not <code>const</code> initializers.</li>
+                                <li>do not call <code>textureSize</code>, <code>imageSize</code>, or similar query functions on bindless samplers. pass sizes explicitly.</li>
+                                <li>only enable vendor extensions that the shader actually uses.</li>
+                                <li>test on at least one amd or intel integrated gpu when possible.</li>
+                            </ul>
+                            <p>the <a href="#lua-guide">lua integration guide</a> covers the scripting side of shader parameters and post passes. the <a href="./lua_api.html">lua api reference</a> contains the complete generated signatures.</p>
+                        </section>
+
+                        <section class="docs-content-lua-guide" id="lua-guide" hidden>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>lua guide</strong></h2>
+                            <p>inso loads one lua entry point per mapset. the script can react to playback, change hitobjects, create drawables, drive shaders, and build effects around the normal osu! map.</p>
+
+                            <h2>connect a script</h2>
+                            <p>point to a plain lua filename from the map's <code>.inso</code> file:</p>
+                            <pre><code>[General]
+LuaEntryPoint: main.lua</code></pre>
+                            <p>the entry point must be a filename in the mapset folder. paths containing <code>/</code>, <code>\</code>, or <code>:</code> are not accepted.</p>
+                            <p>callbacks are global functions. inso checks for them after loading the file, so a local function with the right name will not become an event handler.</p>
+
+                            <h2>your first script</h2>
+                            <p>this script creates a textured drawable, attaches a small animation, and places it on the overlay:</p>
+                            <pre><code>function on_init()
+    local pulse = Animation.new()
+        :scale(0, 1, 1, 1, 1.1, 1.1, Tween.CUBIC_OUT)
+
+    icon = Element.new("reversearrow.png")
+        :set_animation(pulse)
+
+    icon_drawable = Drawable.new(icon, 0, 999999, Layer.OVERLAY)
+        :set_pos(256, 192)
+        :set_size(96, 96)
+end</code></pre>
+                            <p>objects returned by <code>Drawable.new</code>, <code>Element.new</code>, and <code>Animation.new</code> are userdata handles. keep a reference when the object needs to stay alive or when you will update it later. setters return <code>self</code>, so the calls can be chained.</p>
+                            <p>animation times are normalized from <code>0</code> to <code>1</code> by default. use <code>TimeDomain.MILLISECONDS</code> or <code>TimeDomain.MAP_MILLISECONDS</code> when the animation should follow a duration or an absolute map time.</p>
+
+                            <h2>events and time</h2>
+                            <p>the most common callbacks are:</p>
+                            <div class="docs-table-wrapper">
+                                <table class="docs-table">
+                                    <thead>
+                                        <tr><th scope="col">callback</th><th scope="col">when it runs</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row"><code>on_init()</code></th><td>once after the beatmap and script load, before play</td></tr>
+                                        <tr><th scope="row"><code>on_update(time_ms)</code></th><td>once per rendered frame</td></tr>
+                                        <tr><th scope="row"><code>on_fixed_update(time_ms)</code></th><td>on a fixed music-time clock for deterministic simulation</td></tr>
+                                        <tr><th scope="row"><code>on_beat(beat)</code></th><td>when playback crosses a beat</td></tr>
+                                        <tr><th scope="row"><code>on_timing_change(beat, bpm)</code></th><td>when an uninherited timing point becomes active</td></tr>
+                                        <tr><th scope="row"><code>on_pause_change(paused)</code></th><td>when playback pauses or resumes</td></tr>
+                                        <tr><th scope="row"><code>on_judgement(hitobject, judgement, timing_error_ms)</code></th><td>when an object receives a judgement</td></tr>
+                                        <tr><th scope="row"><code>on_map_complete()</code></th><td>when the last scoring object has been judged</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>use <code>on_update</code> for frame-based visual motion. use <code>on_fixed_update</code> for simulation that should be reproducible across frame rates. declaring <code>on_fixed_update</code> also moves scheduled callbacks onto the fixed clock.</p>
+                            <p>the complete event list, signatures, and class reference are in the generated <a href="./lua_api.html">lua api</a>.</p>
+
+                            <h2>beat-driven visuals</h2>
+                            <p>beatmap helpers expose timing values so effects can follow the current map instead of using a guessed bpm:</p>
+                            <pre><code>function on_beat(beat)
+    if beat % 4 == 0 then
+        icon_drawable:set_beat_pulse(true)
+    end
+end
+
+function on_update(time_ms)
+    local pulse = Beatmap.get_beat_proximity()
+    icon_drawable:set_color(Color.rgba(255, 255, 255, 180 + pulse * 75))
+end</code></pre>
+                            <p><code>Beatmap.get_beat_proximity()</code> returns <code>1</code> on the beat and eases toward <code>0</code> before the next beat. <code>Beatmap.get_music_time_ms()</code>, <code>Beatmap.get_bpm()</code>, and <code>Beatmap.get_beat_length_ms()</code> are useful when the effect needs its own timing.</p>
+
+                            <h2>schedule map-time actions</h2>
+                            <p>schedule actions in music time rather than in wall-clock seconds:</p>
+                            <pre><code>function on_init()
+    schedule_at(5000, function()
+        Beatmap.set_skin_override("gn")
+    end)
+
+    schedule_after(3000, function()
+        Beatmap.clear_skin_override()
+    end)
+end</code></pre>
+                            <p>events scheduled during <code>on_init</code> persist and replay when the editor seeks backward. events scheduled from another callback are one-shot. <code>schedule_event</code> is the named-event version, while <code>schedule_at</code> and <code>schedule_after</code> take functions directly.</p>
+
+                            <h2>change hitobjects</h2>
+                            <p>query visible objects and use their base position when applying motion. <code>set_pos</code> is absolute, so reading <code>get_base_pos</code> prevents frame-by-frame offsets from accumulating:</p>
+                            <pre><code>function on_update(time_ms)
+    for _, hitobject in ipairs(Hitobject.get_visible_incl_followpoints()) do
+        local index = hitobject:get_index()
+        local x, y = hitobject:get_base_pos()
+        local angle = time_ms * 0.001 + index * 0.1
+
+        hitobject:set_pos(
+            x + math.cos(angle) * 12,
+            y + math.sin(angle) * 12
+        )
+    end
+end</code></pre>
+                            <p>use <code>get_visible_incl_followpoints</code> when the motion should include objects whose followpoint line is visible before the object enters its own approach window. hitobjects can also change size, timing windows, visibility, slider behavior, and custom drawables.</p>
+
+                            <h2>react to judgements</h2>
+                            <p>judgement callbacks can observe play results, while <code>validate_judgement</code> can replace them before they are committed:</p>
+                            <pre><code>function on_judgement(hitobject, judgement, timing_error_ms)
+    if hitobject then
+        print(hitobject:get_index(), judgement, timing_error_ms)
+    end
+end
+
+function validate_judgement(hitobject, judgement, timing_error_ms)
+    if hitobject and hitobject:has_any_bits(0x01) then
+        return Judgement.IGNORED_HIT, timing_error_ms
+    end
+end</code></pre>
+                            <p>return nothing from <code>validate_judgement</code> to keep the original result. it cannot cancel a judgement with <code>nil</code>; use <code>Judgement.IGNORED_HIT</code> when an object should not affect normal scoring.</p>
+
+                            <h2>layers and post passes</h2>
+                            <p>drawables use the built-in render layers, and scripts can declare a layer positioned relative to one of them:</p>
+                            <pre><code>function on_init()
+    fx_layer = Beatmap.add_layer("map_fx", {
+        anchor = Layer.HITOBJECTS,
+        above = true
+    })
+
+    fx = Element.new("effect.png")
+    fx_drawable = Drawable.new(fx, 0, 999999, fx_layer)
+end</code></pre>
+                            <p>declare custom layers in <code>on_init</code>. the returned id can be passed anywhere a layer is accepted, including <code>Drawable.new</code>, <code>Beatmap.capture_layers</code>, and <code>Beatmap.add_post_pass</code>.</p>
+                            <p>post-processing uses named render targets from the <code>.inso</code> file:</p>
+                            <pre><code>function on_init()
+    Beatmap.capture_layers("scene", {
+        Layer.BACKGROUND,
+        Layer.FOREGROUND,
+        Layer.HITOBJECTS,
+        Layer.UI,
+        Layer.CURSOR
+    })
+
+    Beatmap.add_post_pass{
+        shader = "crt",
+        src = "scene",
+        dst = "screen",
+        after = Layer.TOP
+    }
+end</code></pre>
+                            <p>see the <a href="#shader-guide">shader integration guide</a> for the matching glsl interfaces, backbuffer setup, and render-target examples.</p>
+
+                            <h2>split scripts into files</h2>
+                            <p><code>load_file</code> loads another lua file from the mapset folder and returns its result:</p>
+                            <pre><code>local random = load_file("rand.lua")
+
+function on_init()
+    print(random.next())
+end</code></pre>
+                            <p>this is useful for keeping reusable helpers out of the entry point. the embedded runtime opens the base, table, string, and math libraries. <code>io</code>, <code>os</code>, <code>package</code>, and <code>debug</code> are not available to map scripts.</p>
+
+                            <h2>runtime notes</h2>
+                            <ul>
+                                <li>scripts must be plain source files. precompiled lua bytecode is rejected.</li>
+                                <li>each protected callback has a 1.000.000 instruction count limiter to catch accidental infinite loops.</li>
+                                <li>callbacks run inside the map lifecycle, so reloads recreate script objects and registrations.</li>
+                                <li>keep expensive work out of <code>on_update</code> when a scheduled event or fixed update is enough.</li>
+                            </ul>
+                            <p>the <a href="./lua_api.html">lua api reference</a> is generated from the engine's registrations and is the authoritative list of available classes, methods, enums, and callback signatures.</p>
                         </section>
                     </div>
 
-                    <a class="docs-back docs-back-top" href="#">^ BACK TO TOP</a>
+                    <a class="docs-back" href="./">&lt; BACK</a><span class="docs-path-separator"> / </span><a class="docs-back docs-back-top" href="#">SCROLL TO TOP ^</a>
                 </main>
             </div>
         </div>

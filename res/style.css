@@ -10,6 +10,7 @@
 
 :root {
     --bg: #181518;
+    --bg-light: hsla(280, 20%, 40%, 0.11);
     --panel: #1e1b23;
     --text: hsl(250, 10%, 90%);
     --muted: #8b91a0;
@@ -537,6 +538,8 @@ footer {
 }
 
 .docs-sidebar {
+    display: flex;
+    flex-direction: column;
     padding: 1.5rem 1rem;
     border-right: 1px solid var(--line);
 }
@@ -548,16 +551,23 @@ footer {
 
 .docs-sidebar .docs-tree-root {
     display: inline-block;
-    padding: 0;
-    margin-bottom: 0.75rem;
-    color: var(--text);
+    padding: 0.08rem 0.35rem 0.5rem;
+    margin-left: -0.45rem;
+    margin-bottom: 0.35rem;
     font: 1em "OCR-A";
     text-decoration: none;
 }
 
 .docs-sidebar .docs-tree-root:hover,
 .docs-sidebar .docs-tree-root:focus-visible {
+    color: var(--text);
     text-decoration: underline;
+    background: var(--bg-light);
+}
+
+.docs-sidebar .docs-tree-root[aria-current="page"] {
+    color: var(--light);
+    background: var(--bg);
 }
 
 .docs-sidebar nav {
@@ -600,6 +610,12 @@ footer {
     text-decoration: none;
 }
 
+.docs-sidebar a:hover {
+    color: var(--text);
+    background: var(--bg-light);
+}
+
+
 .docs-sidebar nav a::before {
     content: "";
     position: absolute;
@@ -618,8 +634,19 @@ footer {
     vertical-align: -0.2em;
 }
 
-.docs-sidebar a:hover {
+.docs-home {
+    display: block;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    color: var(--muted);
+    font: 0.78em "OCR-A";
+    text-decoration: none;
+}
+
+.docs-home:hover,
+.docs-home:focus-visible {
     color: var(--text);
+    text-decoration: underline;
 }
 
 .docs-sidebar a:focus-visible,
@@ -628,7 +655,7 @@ footer {
     background: var(--bg);
 }
 
-.docs-sidebar a[aria-current="page"]::before {
+.docs-sidebar nav a[aria-current="page"]::before {
     background: var(--light);
 }
 
@@ -686,7 +713,7 @@ footer {
 }
 
 .docs-path-root {
-    color: var(--link-muted) !important;
+    color: var(--light) !important;
     text-decoration: none;
 }
 .docs-path-root:hover {
@@ -706,11 +733,88 @@ footer {
 .docs-content p,
 .docs-content li {
     max-width: 70ch;
+    font-size: 0.87em;
     line-height: 1.7;
 }
 
 .docs-content ul {
+    list-style: none;
     padding-left: 1.5rem;
+}
+
+.docs-content ul > li {
+    position: relative;
+}
+
+.docs-content ul > li::before {
+    content: "-";
+    position: absolute;
+    left: -1rem;
+    color: var(--muted);
+}
+
+.docs-content ol {
+    padding-left: 1.5rem;
+}
+
+.docs-content li + li {
+    margin-top: 0.2rem;
+}
+
+.docs-content pre {
+    max-width: 70ch;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font: 0.78em/1.7 "Noto Mono", monospace;
+}
+
+.docs-content pre code {
+    color: inherit;
+    font-size: inherit;
+}
+
+.docs-table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg);
+    text-align: left;
+}
+
+.docs-table th,
+.docs-table td {
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+.docs-table thead {
+    color: var(--muted);
+    font: 0.72em "OCR-A";
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.docs-table tbody th {
+    min-width: 12rem;
+    color: var(--text);
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+.docs-table tbody td {
+    color: var(--muted);
+    font-size: 0.82em;
 }
 
 .docs-content a {
