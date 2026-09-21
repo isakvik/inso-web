@@ -8,72 +8,85 @@
         <link rel="preload" href="../res/OCRA.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         <link rel="preload" href="../res/noto-mono.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         <link rel="stylesheet" href="../res/style.css" />
+        <script src="../res/site.js" defer></script>
     </head>
-    <body>
+    <body class="docs-body">
+        <a class="docs-logo" href="../" aria-label="back to inso home">
+            <img src="../res/insooutline.png" alt="inso" />
+        </a>
         <div class="docs-page">
             <div class="docs-layout">
                 <aside class="docs-sidebar">
-                    <h2>DOCUMENTATION</h2>
-                    <nav aria-label="documentation sections">
-                        <a href="./" aria-current="page">OVERVIEW</a>
-                        <a href="#getting-started">GETTING STARTED</a>
-                        <a href="#command-line">COMMAND LINE</a>
-                        <a href="#lan-tournament">LAN TOURNAMENT</a>
-                        <a href="./lua_api.html">LUA API</a>
-                        <a href="#metadata">INSO METADATA</a>
+                    <a class="docs-tree-root" href="./">inso_docs/</a>
+                    <nav class="docs-tree-nav" aria-label="documentation sections">
+                        <a class="docs-nav-link" href="#getting-started">getting started</a>
+                        <a class="docs-nav-link" href="#command-line">command line</a>
+                        <a class="docs-nav-link" href="#lan-tournament">tournament mode</a>
+                        <a class="docs-nav-link" href="#metadata">inso metadata</a>
+                        <a href="./lua_api.html"><svg class="docs-file-icon" viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#file-icon"></use></svg>lua api</a>
                     </nav>
                 </aside>
 
                 <main class="docs-content">
-                    <h1>DOCUMENTATION</h1>
-                    <p>guides and reference material for making, running, and hosting inso maps.</p>
+                    <div class="docs-content-views">
 
-                    <div class="docs-card-list">
-                        <a class="docs-card" href="#getting-started">
-                            <strong>GETTING STARTED</strong>
-                            <span>set up inso and open your first map.</span>
-                        </a>
-                        <a class="docs-card" href="#command-line">
-                            <strong>COMMAND LINE</strong>
-                            <span>available inso.exe flags and their effects.</span>
-                        </a>
-                        <a class="docs-card" href="#lan-tournament">
-                            <strong>LAN TOURNAMENT MODE</strong>
-                            <span>run synchronized play across multiple clients.</span>
-                        </a>
-                        <a class="docs-card" href="./lua_api.html">
-                            <strong>LUA API</strong>
-                            <span>the api reference generated directly from the game.</span>
-                        </a>
-                        <a class="docs-card" href="#metadata">
-                            <strong>INSO METADATA</strong>
-                            <span>configure map behavior with an .inso file.</span>
-                        </a>
+                        <section class="docs-content-getting-started" id="getting-started" hidden>
+                            <h2 class="docs-path"><a class="docs-path-root" href="./">documentation</a><span class="docs-path-separator">/</span><strong>getting started</strong></h2>
+                            <p>unzip the latest release, add your songs to the <code>songs/</code> folder, and run inso. maps can be opened with the open external button.</p>
+                        </section>
+
+                        <section class="docs-content-overview" id="overview">
+                            <h1 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>overview</strong></h1>
+                            <p>guides and reference material for making inso maps. don't hesitate to reach out if you'd like something added.</p>
+                            <div class="docs-card-list">
+                                <a class="docs-card" href="#getting-started">
+                                    <strong>GETTING STARTED</strong>
+                                    <span>set up inso and open your first map.</span>
+                                </a>
+                                <a class="docs-card" href="#command-line">
+                                    <strong>COMMAND LINE</strong>
+                                    <span>available inso.exe flags and their effects.</span>
+                                </a>
+                                <a class="docs-card" href="#lan-tournament">
+                                    <strong>LAN TOURNAMENT MODE</strong>
+                                    <span>run synchronized play across multiple clients.</span>
+                                </a>
+                                <a class="docs-card" href="./lua_api.html">
+                                    <strong>LUA API</strong>
+                                    <span>the api reference generated directly from the game.</span>
+                                </a>
+                                <a class="docs-card" href="#metadata">
+                                    <strong>INSO METADATA</strong>
+                                    <span>configure map behavior with an .inso file.</span>
+                                </a>
+                            </div>
+                        </section>
+
+                        <section class="docs-content-command-line" id="command-line" hidden>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>command-line</strong></h2>
+                            <p>the command-line reference will be expanded here. for now, the main flags are documented in the game readme.</p>
+                        </section>
+
+                        <section class="docs-content-lan-tournament" id="lan-tournament" hidden>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>lan-tournament</strong></h2>
+                            <p>the tournament client waits for a start packet from <code>inso_lan_broadcast</code>, allowing several clients to begin a map together.</p>
+                        </section>
+
+                        <section class="docs-content-metadata" id="metadata" hidden>
+                            <h2 class="docs-path"><span class="docs-path-root">documentation</span><span class="docs-path-separator">/</span><strong>metadata</strong></h2>
+                            <p>metadata reference will be added here. map authors can use an <code>.inso</code> file to configure scripts, shaders, and other map behavior.</p>
+                        </section>
                     </div>
 
-                    <section id="getting-started">
-                        <h2>GETTING STARTED</h2>
-                        <p>unzip the latest release, add your songs to the <code>songs/</code> folder, and run inso. maps can be opened with the open external button.</p>
-                    </section>
-
-                    <section id="command-line">
-                        <h2>COMMAND LINE</h2>
-                        <p>the command-line reference will be expanded here. for now, the main flags are documented in the game readme.</p>
-                    </section>
-
-                    <section id="lan-tournament">
-                        <h2>LAN TOURNAMENT MODE</h2>
-                        <p>the tournament client waits for a start packet from <code>inso_lan_broadcast</code>, allowing several clients to begin a map together.</p>
-                    </section>
-
-                    <section id="metadata">
-                        <h2>INSO METADATA</h2>
-                        <p>metadata reference will be added here. map authors can use an <code>.inso</code> file to configure scripts, shaders, and other map behavior.</p>
-                    </section>
-
-                    <a class="docs-back" href="../">&lt; BACK TO INSO</a>
+                    <a class="docs-back docs-back-top" href="#">^ BACK TO TOP</a>
                 </main>
             </div>
         </div>
+
+        <svg width="100%" height="100%" style="display: none" preserveAspectRatio="xMidYMid" fill="#000000" aria-hidden="true" focusable="false">
+            <symbol id="file-icon" viewBox="0 0 16 16">
+                <path d="M3 1.5h6l4 4v9H3z M9 1.5v4h4" fill="none" stroke="currentColor" stroke-width="1" />
+            </symbol>
+        </svg>
     </body>
 </html>
