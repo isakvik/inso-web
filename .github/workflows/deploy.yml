@@ -20,7 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
+      - name: install odin
+        uses: laytan/setup-odin@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release: latest
+      - name: build docs generator
+        run: |
+          mkdir -p .build
+          odin build tools/docsgen -out:.build/docsgen -o:speed
       - name: build site
+        env:
+          DOCS_GENERATOR: ${{ github.workspace }}/.build/docsgen
         run: bash gen_site.sh
       - uses: actions/upload-pages-artifact@v5
         with:

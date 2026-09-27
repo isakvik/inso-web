@@ -1,4 +1,4 @@
-const setupSectionNavigation = ({ sectionSelector, linkSelector, rootLinkSelector, sectionClassPrefix, defaultSection }) => {
+const setupSectionNavigation = ({ sectionSelector, linkSelector, sectionClassPrefix, defaultSection }) => {
     const contentSections = [...document.querySelectorAll(sectionSelector)];
 
     if (!contentSections.length) {
@@ -6,7 +6,6 @@ const setupSectionNavigation = ({ sectionSelector, linkSelector, rootLinkSelecto
     }
 
     const links = [...document.querySelectorAll(linkSelector)];
-    const rootLink = rootLinkSelector ? document.querySelector(rootLinkSelector) : null;
     const contentTransitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180;
     let currentSection;
     let enterFrame;
@@ -23,14 +22,6 @@ const setupSectionNavigation = ({ sectionSelector, linkSelector, rootLinkSelecto
                 link.setAttribute("aria-current", "page");
             } else {
                 link.removeAttribute("aria-current");
-            }
-        }
-
-        if (rootLink) {
-            if (name === defaultSection) {
-                rootLink.setAttribute("aria-current", "page");
-            } else {
-                rootLink.removeAttribute("aria-current");
             }
         }
     };
@@ -115,51 +106,6 @@ setupSectionNavigation({
     defaultSection: "home",
 });
 
-setupSectionNavigation({
-    sectionSelector: ".docs-content-views > section",
-    linkSelector: '.docs-nav-link[href^="#"]',
-    rootLinkSelector: ".docs-tree-root",
-    sectionClassPrefix: "docs-content",
-    defaultSection: "overview",
-});
-
-const setupDocsBackLink = () => {
-    const link = document.querySelector(".docs-back-top");
-    const tree = document.querySelector(".docs-tree-nav");
-
-    if (!link || !tree) {
-        return;
-    }
-
-    const updateTarget = () => {
-        const activeLink = tree.querySelector('a[aria-current="page"]');
-
-        if (activeLink) {
-            link.href = activeLink.hash;
-        }
-    };
-
-    link.addEventListener("click", (event) => {
-        const target = document.getElementById(link.hash.slice(1));
-
-        if (!target) {
-            return;
-        }
-
-        event.preventDefault();
-        target.scrollIntoView({
-            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-            block: "start",
-        });
-    });
-
-    const observer = new MutationObserver(updateTarget);
-    observer.observe(tree, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
-    updateTarget();
-};
-
-setupDocsBackLink();
-
 const setupDocsTreeHighlight = () => {
     const tree = document.querySelector(".docs-tree-nav");
 
@@ -201,8 +147,6 @@ const setupDocsTreeHighlight = () => {
         }
     });
 
-    const observer = new MutationObserver(setActiveHighlight);
-    observer.observe(tree, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
     window.addEventListener("resize", setActiveHighlight);
     setActiveHighlight();
 };
