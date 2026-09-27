@@ -3,6 +3,8 @@ name: deploy
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    types: [release-published]
   workflow_dispatch:
 
 permissions:
@@ -32,6 +34,7 @@ jobs:
       - name: build site
         env:
           DOCS_GENERATOR: ${{ github.workspace }}/.build/docsgen
+          RELEASE_TAG: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.release_tag || '' }}
         run: bash gen_site.sh
       - uses: actions/upload-pages-artifact@v5
         with:
