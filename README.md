@@ -9,7 +9,7 @@ documentation articles live in `content/docs/` as markdown files. each file star
 ```yaml
 ---
 title: getting started
-description: install inso and author your first map
+description: installing inso and how to start mapping
 order: 10
 ---
 ```
@@ -19,8 +19,14 @@ article links should point to another source article with a relative `.md` path.
 the site build compiles the odin generator automatically when needed:
 
 ```sh
-bash gen_site.sh
-python3 -m http.server --directory _site
+./run.sh
+```
+
+the site is served at `http://127.0.0.1:8000/`. pass a port as the first argument, or set `PORT`, when needed:
+
+```sh
+./run.sh 8080
+PORT=8080 ./run.sh
 ```
 
 the github pages workflow installs odin, builds the generator binary, and then runs the same site build.

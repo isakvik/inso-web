@@ -1,5 +1,5 @@
 ---
-title: shader guide
+title: Shader guide
 description: register pipelines, draw custom effects, and build post-processing
 order: 50
 ---
@@ -8,13 +8,9 @@ Custom shaders are map resources. Declare a pipeline in the `.inso` file, then s
 
 ## the integration loop
 
-Shader work in inso usually has three parts:
+Declare a named shader pipeline in the [inso metadata](inso-file-format.md#shaders) and add your shaders by filename to it. Any `Element`, `Drawable`, or post pass can then refer to that pipeline by name (string key).
 
-1. Declare a named shader pipeline in [inso metadata](metadata.md#shaders).
-2. Write a vertex and fragment shader using the interface for the pipeline you are replacing.
-3. Create an `Element`, `Drawable`, or post pass that refers to the pipeline by name.
-
-Shader files and map assets are watched while a map is open in editor or waiting mode, so a compilable edit is picked up without restarting the game.
+Shader files and map assets are watched while a map is open in editor or waiting mode, so any edit is picked up and reloaded automatically. Any errors found during shader compile will be printed as a notification in-game, but will continue running with the last working version of that shader.
 
 ## a first quad shader
 
@@ -31,9 +27,7 @@ FragmentShader: wave.fs.glsl
 BlendMode: Alpha
 ```
 
-The name `wave` is a map-local pipeline name. It is not the filename, and it is the name used by `Element:set_shader`.
-
-Here is a complete fragment shader that tints a map texture with a moving wave:
+Example fragment shader that tints a map texture with a moving wave:
 
 ```glsl
 #version 460
@@ -69,9 +63,9 @@ void main() {
 }
 ```
 
-The bindless and non-bindless branches are both required. inso tries the bindless variant when the graphics driver supports it and falls back to the array of sampler uniforms otherwise. Some integrated GPUs disable bindless up front, so the non-bindless branch must remain valid even when the shader was authored on a discrete GPU.
+The bindless and non-bindless branches are both required. inso tries the bindless variant when the graphics driver supports it and falls back to the array of sampler uniforms otherwise. Some integrated GPUs disable bindless up front, so the non-bindless branch should remain valid even when the shader was authored on a discrete GPU.
 
-Select the pipeline from Lua and put it on a drawable:
+You can then set up a Drawable Lua-side and apply the shader to it:
 
 ```lua
 function on_init()
@@ -135,7 +129,7 @@ Float index `13` is stored in `params[3].y`, for example. Use `index / 4` for th
 
 ## post-processing
 
-Post passes are fullscreen draws that sample a render target and write to another one. Capture the layers you want, declare the intermediate targets, then queue the passes from `on_init`.
+Post passes are fullscreen draws that sample a render target and write to another one. Capture the layers you want, declare the intermediate targets, then set up the dependency graph from `on_init`.
 
 ```text
 [General]
@@ -252,4 +246,4 @@ The validator checks the declared shader pairs with and without bindless texture
 - Only enable vendor extensions that the shader actually uses.
 - Test on at least one AMD or Intel integrated GPU when possible.
 
-The [lua integration guide](lua-guide.md) covers the scripting side of shader parameters and post passes. The [lua api reference](/docs/lua_api.html) contains the complete generated signatures.
+The [Lua integration guide](lua-guide.md) covers the scripting side of shader parameters and post passes. The [Lua API reference](/docs/lua_api.html) contains the complete generated signatures.

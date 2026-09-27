@@ -23,6 +23,7 @@
     --navlink: hsl(0, 0%, 90%);
     --light: hsl(290, 55%, 75%);
     --link-muted: hsl(280, 15%, 45%);
+    --link-sub: hsl(278, 30%, 60%);
 
     --logo-size: 1.3em;
 }
@@ -48,7 +49,7 @@ body {
 code {
     color: var(--light);
     font-family: "Noto Mono", monospace;
-    font-size: 0.9em;
+    font-size: inherit;
 }
 
 a {
@@ -396,7 +397,7 @@ footer {
 
 .docs-sidebar .docs-tree-root {
     display: inline-block;
-    padding: 0.35rem;
+    padding: 0.45rem 0.5rem;
     margin-left: -0.45rem;
     margin-bottom: 0.35rem;
     font: 1em "OCR-A";
@@ -419,14 +420,14 @@ footer {
 .docs-sidebar nav {
     position: relative;
     display: grid;
-    gap: 0.35rem;
+    gap: 0.25rem;
     padding-left: 1rem;
     background: linear-gradient(var(--line), var(--line)) 0.3rem 0 / 1px calc(100% - 0.9rem) no-repeat;
 }
 
 .docs-tree-nav ul {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -494,8 +495,8 @@ footer {
     content: "";
     position: absolute;
     top: 50%;
-    left: -0.7rem;
-    width: 0.7rem;
+    left: calc(-0.7rem - var(--docs-tree-indent, 0px));
+    width: calc(0.7rem + var(--docs-tree-indent, 0px));
     height: 1px;
     background: var(--line);
 }
@@ -511,6 +512,7 @@ footer {
 .docs-home {
     display: block;
     margin-top: auto;
+    margin-bottom: -0.5rem;
     padding-top: 1.5rem;
     color: var(--muted);
     font: 0.78em "OCR-A";
@@ -533,6 +535,10 @@ footer {
     background: var(--light);
 }
 
+.docs-sidebar nav .docs-heading-nav a::before {
+    display: none;
+}
+
 .docs-sidebar a:hover::before,
 .docs-sidebar a:focus-visible::before {
     background: var(--text);
@@ -545,11 +551,44 @@ footer {
 }
 
 .docs-content h1 {
-    margin-top: 0;
+    margin-top: 0.25rem;
 }
 
 .docs-content h2 {
-    margin-top: 3rem;
+    font-size: 1.1em;
+    margin-top: 2rem;
+}
+
+.docs-content h1[id],
+.docs-content h2[id],
+.docs-content h3[id],
+.docs-content h4[id],
+.docs-content h5[id],
+.docs-content h6[id] {
+    scroll-margin-top: 1rem;
+}
+
+.docs-content .docs-heading-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.docs-content .docs-heading-link:hover,
+.docs-content .docs-heading-link:focus-visible {
+    color: inherit;
+    text-decoration: none;
+}
+
+.docs-content .docs-heading-target {
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    font-family: "Noto Mono";
+}
+
+.docs-heading-link:hover .docs-heading-target,
+.docs-heading-link:focus-visible .docs-heading-target {
+    opacity: 1;
 }
 
 .docs-path {
@@ -558,12 +597,12 @@ footer {
     gap: 0.35em;
     font: 1.1em "OCR-A";
     letter-spacing: -0.04em;
-    text-shadow: none;
 }
 
 .docs-path-root {
     color: var(--light) !important;
     text-decoration: none;
+    text-shadow: var(--light) 0 0 0.08em;
 }
 .docs-path-root:hover {
     text-decoration: underline;
@@ -572,18 +611,19 @@ footer {
 
 .docs-path-separator {
     color: var(--line);
+    text-shadow: var(--line) 0 0 0.08em;
 }
 
 .docs-path strong {
     color: var(--text);
     font-weight: normal;
+    text-shadow: var(--text) 0 0 0.08em;
 }
 
 .docs-content p,
 .docs-content li {
-    max-width: 70ch;
-    font-size: 0.87em;
-    line-height: 1.7;
+    font-size: 0.82em;
+    line-height: 1.5;
 }
 
 .docs-content ul {
@@ -657,8 +697,8 @@ footer {
 .docs-table tbody th {
     min-width: 12rem;
     color: var(--text);
-    font-weight: normal;
     white-space: nowrap;
+    font-size: 0.82em;
 }
 
 .docs-table tbody td {
@@ -668,6 +708,18 @@ footer {
 
 .docs-content a {
     color: var(--light);
+}
+
+.docs-heading-nav {
+    margin-top: 0.15rem !important;
+    padding-left: 0.8rem !important;
+}
+
+.docs-heading-nav a {
+    padding: 0.25rem 0.7rem;
+    color: var(--link-sub);
+    font-size: 0.7em;
+    line-height: 1.4;
 }
 
 .docs-card-list {
@@ -707,6 +759,10 @@ footer {
     font: 0.8em "OCR-A";
     text-decoration: none;
 }
+.docs-back:hover {
+    text-decoration: underline;
+}
+
 
 @media (max-width: 700px) {
     .docs-page {

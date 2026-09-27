@@ -113,9 +113,27 @@ const setupDocsTreeHighlight = () => {
         return;
     }
 
-    const links = [...tree.querySelectorAll("a")];
+    const links = [...tree.querySelectorAll(".docs-nav-link")];
+    const rootList = tree.querySelector("ul");
 
     const getLinkMidpoint = (link) => Math.round(link.offsetTop + link.offsetHeight / 2);
+
+    const setLinkIndents = () => {
+        for (const link of links) {
+            let indent = 0;
+            let list = link.closest("ul");
+
+            while (list && list !== rootList) {
+                const padding = Number.parseFloat(window.getComputedStyle(list).paddingLeft);
+                if (Number.isFinite(padding)) {
+                    indent += padding;
+                }
+                list = list.parentElement ? list.parentElement.closest("ul") : null;
+            }
+
+            link.style.setProperty("--docs-tree-indent", `${indent}px`);
+        }
+    };
 
     const setActiveHighlight = () => {
         const link = tree.querySelector('a[aria-current="page"]');
@@ -147,7 +165,11 @@ const setupDocsTreeHighlight = () => {
         }
     });
 
-    window.addEventListener("resize", setActiveHighlight);
+    window.addEventListener("resize", () => {
+        setLinkIndents();
+        setActiveHighlight();
+    });
+    setLinkIndents();
     setActiveHighlight();
 };
 

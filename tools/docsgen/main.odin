@@ -17,6 +17,18 @@ Article :: struct {
 	order:           int,
 	body:            string,
 	html:            string,
+	headings:        [dynamic]Heading,
+}
+
+Heading :: struct {
+	level: int,
+	id:    string,
+	text:  string,
+}
+
+Rendered_Markdown :: struct {
+	html:     string,
+	headings: [dynamic]Heading,
 }
 
 Nav_Node :: struct {
@@ -46,7 +58,9 @@ main :: proc() {
 
 	nodes := build_navigation(articles[:])
 	for &article in articles {
-		article.html = render_markdown(article, articles[:])
+		rendered := render_markdown(article, articles[:])
+		article.html = rendered.html
+		article.headings = rendered.headings
 	}
 
 	for article in articles {
@@ -302,7 +316,7 @@ render_page :: proc(article: Article, articles: []Article, nodes: []Nav_Node) ->
 		render_navigation(&builder, nodes, 0, articles, article.route)
 		fmt.sbprintfln(&builder, `                        <a class="docs-nav-link docs-file-link" href="/docs/lua_api.html"><svg class="docs-file-icon" viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#file-icon"></use></svg>lua_api.html</a>`)
 	fmt.sbprintfln(&builder, `                    </nav>`)
-	fmt.sbprintfln(&builder, `                    <a class="docs-home" href="/">&lt; HOME</a>`)
+	fmt.sbprintfln(&builder, `                    <a class="docs-home" href="/">&lt;&lt; HOME</a>`)
 	fmt.sbprintfln(&builder, `                </aside>`)
 	fmt.sbprintfln(&builder, `                <main class="docs-content">`)
 	fmt.sbprintfln(&builder, `                    <article>`)
@@ -312,7 +326,11 @@ render_page :: proc(article: Article, articles: []Article, nodes: []Nav_Node) ->
 		render_overview_cards(&builder, nodes, articles)
 	}
 	fmt.sbprintfln(&builder, `                    </article>`)
-	fmt.sbprintfln(&builder, `                    <a class="docs-back" href="/docs/">&lt; BACK</a><span class="docs-path-separator"> / </span><a class="docs-back" href="#">SCROLL TO TOP ^</a>`)
+	if is_overview {
+		fmt.sbprintfln(&builder, `                    <a class="docs-back" href="#">SCROLL TO TOP ^</a>`)
+	} else {
+		fmt.sbprintfln(&builder, `                    <a class="docs-back" href="/docs/">&lt; BACK</a><span class="docs-path-separator"> / </span><a class="docs-back" href="#">SCROLL TO TOP ^</a>`)
+	}
 	fmt.sbprintfln(&builder, `                </main>`)
 	fmt.sbprintfln(&builder, `            </div>`)
 	fmt.sbprintfln(&builder, `        </div>`)
@@ -337,6 +355,9 @@ render_navigation :: proc(builder: ^strings.Builder, nodes: []Nav_Node, parent: 
 			} else {
 				fmt.sbprintfln(builder, `                            <li><a class="docs-nav-link" href="%s">%s</a>`, article.route, escape_html(article.title))
 			}
+			if article.route == current_route {
+				render_heading_navigation(builder, article, articles)
+			}
 		} else {
 			fmt.sbprintfln(builder, `                            <li><span class="docs-nav-group">%s</span>`, escape_html(node.segment))
 		}
@@ -346,6 +367,18 @@ render_navigation :: proc(builder: ^strings.Builder, nodes: []Nav_Node, parent: 
 		fmt.sbprintfln(builder, `                            </li>`)
 	}
 	fmt.sbprintfln(builder, `                        </ul>`)
+}
+
+render_heading_navigation :: proc(builder: ^strings.Builder, article: Article, articles: []Article) {
+	if len(article.headings) == 0 {
+		return
+	}
+
+	fmt.sbprintfln(builder, `                                <ul class="docs-heading-nav" aria-label="article sections">`)
+	for heading in article.headings {
+		fmt.sbprintfln(builder, `                                    <li><a class="docs-heading-link" href="#%s">%s</a></li>`, escape_html(heading.id), render_inline_string(heading.text, article, articles))
+	}
+	fmt.sbprintfln(builder, `                                </ul>`)
 }
 
 render_overview_cards :: proc(builder: ^strings.Builder, nodes: []Nav_Node, articles: []Article) {
@@ -364,7 +397,7 @@ render_overview_cards :: proc(builder: ^strings.Builder, nodes: []Nav_Node, arti
 	fmt.sbprintfln(builder, `                            </div>`)
 }
 
-render_markdown :: proc(article: Article, articles: []Article) -> string {
+render_markdown :: proc(article: Article, articles: []Article) -> Rendered_Markdown {
 	lines, split_err := strings.split_lines(article.body)
 	if split_err != nil {
 		fmt.panicf("could not split %s into lines: %v", article.source_path, split_err)
@@ -372,6 +405,7 @@ render_markdown :: proc(article: Article, articles: []Article) -> string {
 
 	builder := strings.builder_make()
 	heading_ids := make([dynamic]string)
+	headings := make([dynamic]Heading)
 	i := 0
 	for i < len(lines) {
 		line := lines[i]
@@ -407,9 +441,10 @@ render_markdown :: proc(article: Article, articles: []Article) -> string {
 
 		if level, heading_text, is_heading := heading(line); is_heading {
 			id := unique_heading_id(heading_text, &heading_ids)
-			fmt.sbprintf(&builder, `                            <h%d id="%s">`, level, escape_html(id))
+			append(&headings, Heading{level = level, id = id, text = heading_text})
+			fmt.sbprintf(&builder, `                            <h%d id="%s"><a class="docs-heading-link" href="#%s">`, level, escape_html(id), escape_html(id))
 			render_inline(&builder, heading_text, article, articles)
-			fmt.sbprintfln(&builder, `</h%d>`, level)
+			fmt.sbprintfln(&builder, `<span class="docs-heading-target" aria-hidden="true"> #</span></a></h%d>`, level)
 			i += 1
 			continue
 		}
@@ -448,7 +483,7 @@ render_markdown :: proc(article: Article, articles: []Article) -> string {
 		fmt.sbprintfln(&builder, `</p>`)
 	}
 
-	return strings.to_string(builder)
+	return Rendered_Markdown{html = strings.to_string(builder), headings = headings}
 }
 
 is_block_start :: proc(lines: []string, index: int) -> bool {

@@ -1,10 +1,10 @@
 ---
-title: inso file format
-description: configure map behavior with an .inso file
+title: .inso file format
+description: for inso-specific map metadata and behavior
 order: 20
 ---
 
-An `.inso` file adds inso-specific behavior to an osu! mapset. It is a plain text file with colon-separated values and named entries. A mapset should contain one `.inso` file; if multiple files are present, a later file encountered while walking the mapset replaces the earlier configuration, and the walk order should not be relied on.
+An `.inso` file adds inso-specific behavior to an osu! mapset. It is a plain text file with colon-separated values and named entries. A mapset only supports one `.inso` file. Example:
 
 ```text
 inso file format v1
@@ -20,21 +20,20 @@ FragmentShader: background.fs.glsl
 BlendMode: Alpha
 ```
 
-All sections are optional. Filenames and resource names are resolved from the mapset folder. The sections can be used together to build a scripted map, a post-processing chain, or a map that only changes gameplay settings. The `v1` preamble identifies this format for readers; current main does not use it to select parser behavior.
+Each subsection on this page corresponds to an `.inso` file section. All sections are optional. Filenames and resource names are resolved from the mapset folder.
 
-## general
+## General
 
 | key | description |
 | --- | --- |
 | `LuaEntryPoint` | The Lua file to run for the map. Use a single filename such as `main.lua`; path separators and drive-prefix characters are rejected. |
 | `BackgroundPipeline` | The shader pipeline used for the map background. |
-| `DoubleMouse` | A non-zero value enables the special dual-mouse input mode. |
 | `Backbuffer` | A non-zero value enables a full-frame backbuffer that can be sampled by post-processing passes. |
-| `FixedUpdateRate` | The Lua fixed-update frequency in Hz. Values at or below zero use the default rate of 120 Hz. |
+| `FixedUpdateRate` | The Lua fixed-update frequency in Hz. The default rate is 120 Hz. |
 
-## force settings
+## ForceSettings
 
-`[ForceSettings]` applies selected user settings for the lifetime of the map. The user's own values are restored when the map closes and forced values are not written to `user.ini`.
+`[ForceSettings]` forces specified user settings for the lifetime of the map. The values are restored when closing the map, and are not saved to `user.ini`.
 
 | key | description |
 | --- | --- |
@@ -47,22 +46,22 @@ All sections are optional. Filenames and resource names are resolved from the ma
 | `snaking_out_sliders_enabled` | Enable or disable slider body retraction at the end of a slider |
 | `hitsound_volume_follows_music` | Enable or disable hitsound volume following the music volume |
 
-Boolean values are written as `1`, `true`, `0`, or `false`.
+Boolean values can be written as `false`/`true` or `0`/`1`.
 
-## shaders
+## Shaders
 
-Each `[[name]]` entry declares a pipeline that scripts can use by name. Shader paths are relative to the mapset unless they name a built-in shader.
+Each `[[name]]` entry declares a pipeline that scripts can use by name. Shader paths are relative to the mapset unless they name a built-in shader. Values `builtin.quad`, `builtin.slider`, or `builtin.text` resolve to the builtin shaders, so you don't need to supply your own shader for steps that don't need it.
 
 | key | description |
 | --- | --- |
-| `VertexShader` | Vertex shader filename or `builtin.quad`, `builtin.slider`, or `builtin.text` |
-| `FragmentShader` | Fragment shader filename or `builtin.quad`, `builtin.slider`, `builtin.slider_present`, or `builtin.text` |
+| `VertexShader` | Vertex shader filename |
+| `FragmentShader` | Fragment shader filename |
 | `BlendMode` | `None`, `Alpha`, `Additive`, `Max`, `Premultiplied`, or `PremultipliedOver` |
 | `DepthWrite` | Depth writes are disabled by default. Set this to a non-zero value to enable them. |
 
-## buffers
+## Buffers
 
-Each named buffer can load a file-backed model or allocate a writable buffer. `Source` takes precedence when both keys are present.
+Each named buffer can load a model from a `.gltf` file, or allocate a writable buffer. `Source` takes precedence when both keys are present.
 
 ```text
 [Buffers]
@@ -75,7 +74,7 @@ Size: 4096
 
 `Size` is measured in bytes. Buffers can then be referenced from Lua and custom shaders.
 
-## render targets
+## RenderTargets
 
 Render targets provide named off-screen textures for custom drawables and post-processing.
 
@@ -90,7 +89,7 @@ Render targets provide named off-screen textures for custom drawables and post-p
 
 The reserved `backbuffer` and `screen` targets are available to post-processing passes when `Backbuffer: 1` is enabled.
 
-## hitobject extra bits
+## HitObjectExtraBits
 
 Assign script-readable bit flags to hitobjects by their exact start time:
 

@@ -1,5 +1,5 @@
 ---
-title: lua guide
+title: Lua guide
 description: connect scripts to events, hitobjects, drawables, and map time
 order: 60
 ---
@@ -28,7 +28,8 @@ function on_init()
     local pulse = Animation.new()
         :scale(0, 1, 1, 1, 1.1, 1.1, Tween.CUBIC_OUT)
 
-    icon = Element.new("reversearrow.png")
+    icon = Element.new("yuuma_toutetsu.png")
+        :set_shader("oily")
         :set_animation(pulse)
 
     icon_drawable = Drawable.new(icon, 0, 999999, Layer.OVERLAY)
@@ -37,13 +38,15 @@ function on_init()
 end
 ```
 
-Objects returned by `Drawable.new`, `Element.new`, and `Animation.new` are userdata handles. Keep a reference when the object needs to stay alive or when you will update it later. Setters return `self`, so the calls can be chained.
+Objects returned by `Drawable.new`, `Element.new`, and `Animation.new` are userdata references, and will be deleted by Lua's garbage collector if the reference goes out of scope (e.g. if a reference is declared as `local`). Keep a reference when the object needs to stay alive. Setters internally return `self`, so you can chain multiple calls, like in the example.
 
 Animation times are normalized from `0` to `1` by default. Use `TimeDomain.MILLISECONDS` or `TimeDomain.MAP_MILLISECONDS` when the animation should follow a duration or an absolute map time.
 
+Tip: to use elements from the current skin as drawables, prepend `skin:` to the element name and omit the file extension, e.g. `skin:hitcircle`
+
 ## events and time
 
-The most common callbacks are:
+The most useful callbacks are:
 
 | callback | when it runs |
 | --- | --- |
@@ -57,9 +60,9 @@ The most common callbacks are:
 | `on_judgement(hitobject, judgement, timing_error_ms)` | When an object receives a judgement |
 | `on_map_complete()` | When the last scoring object has been judged |
 
-Use `on_update` for frame-based visual motion. Use `on_fixed_update` for simulation that should be reproducible across frame rates. Declaring `on_fixed_update` also moves scheduled callbacks onto the fixed clock.
+Use `on_update` for frame-based visual motion. Use `on_fixed_update` if you need simulation that should be reproducible across frame rates. Declaring `on_fixed_update` also moves scheduled callbacks onto the fixed clock.
 
-The complete event list, signatures, and class reference are in the generated [lua api](/docs/lua_api.html). `on_cursor_moved(x, y)` and `get_cursor_pos()` use playfield `osupx` coordinates. Convert screen pixels with `Window.px_to_osupx()` when needed.
+The complete event list, signatures, and class reference are in the generated [Lua API reference](/docs/lua_api.html). `on_cursor_moved(x, y)` and `get_cursor_pos()` use playfield `osupx` coordinates. Convert screen pixels with `Window.px_to_osupx()` when needed.
 
 ## beat-driven visuals
 
@@ -80,7 +83,7 @@ end
 
 `Beatmap.get_beat_proximity()` returns `1` on the beat and eases toward `0` before the next beat. `Beatmap.get_music_time_ms()`, `Beatmap.get_bpm()`, and `Beatmap.get_beat_length_ms()` are useful when the effect needs its own timing.
 
-## schedule map-time actions
+## scheduling map-time actions
 
 Schedule actions in music time rather than in wall-clock seconds:
 
@@ -88,17 +91,17 @@ Schedule actions in music time rather than in wall-clock seconds:
 function on_init()
     schedule_at(5000, function()
         Beatmap.set_skin_override("gn")
-    end)
-
-    schedule_after(3000, function()
-        Beatmap.clear_skin_override()
+        
+        schedule_after(3000, function()
+            Beatmap.clear_skin_override()
+        end)
     end)
 end
 ```
 
-Events scheduled during `on_init` persist and replay when the editor seeks backward. Events scheduled from another callback are one-shot. `schedule_event` is the named-event version, while `schedule_at` and `schedule_after` take functions directly.
+Events scheduled during `on_init` persist and replay when the editor seeks backward. Events scheduled from another callback are one-shot, and you must reload the map with `Ctrl+R` to have them reapply correctly. `schedule_event` is the named-event version, while `schedule_at` and `schedule_after` take functions directly.
 
-## change hitobjects
+## manipulating hitobjects
 
 Query visible objects and use their base position when applying motion. `set_pos` is absolute, so reading `get_base_pos` prevents frame-by-frame offsets from accumulating:
 
@@ -117,9 +120,9 @@ function on_update(time_ms)
 end
 ```
 
-Use `get_visible_incl_followpoints` when the motion should include objects whose followpoint line is visible before the object enters its own approach window. Hitobjects can also change size, timing windows, visibility, slider behavior, and custom drawables.
+Use `get_visible_incl_followpoints` when the motion should include objects whose followpoint line is visible before the object enters its own approach window. Hitobjects can also change size, timing windows, visibility, slider behavior, and custom drawables. Check the [Lua API reference](/docs/lua_api.html) for the full 
 
-## react to judgements
+## reacting to judgements
 
 Judgement callbacks can observe play results, while `validate_judgement` can replace them before they are committed:
 
@@ -141,7 +144,7 @@ Return nothing from `validate_judgement` to keep the original result. It cannot 
 
 ## layers and post passes
 
-Drawables use the built-in render layers, and scripts can declare a layer positioned relative to one of them:
+Drawables use the built-in render layers. Scripts can declare custom layers positioned relative to one of them:
 
 ```lua
 function on_init()
@@ -155,7 +158,7 @@ function on_init()
 end
 ```
 
-Declare custom layers in `on_init`. The returned id can be passed anywhere a layer is accepted, including `Drawable.new`, `Beatmap.capture_layers`, and `Beatmap.add_post_pass`.
+Declare custom layers in `on_init`. `Beatmap.add_layer` returns a handle that can be passed anywhere a layer is accepted, like `Drawable.new`, `Beatmap.capture_layers`, and `Beatmap.add_post_pass`.
 
 Post-processing uses named render targets from the `.inso` file:
 
@@ -178,7 +181,7 @@ function on_init()
 end
 ```
 
-See the [shader integration guide](shader-guide.md) for the matching GLSL interfaces, backbuffer setup, and render-target examples.
+See the [Shader integration guide](shader-guide.md) for the matching GLSL interfaces, backbuffer setup, and render-target examples.
 
 ## split scripts into files
 
@@ -197,8 +200,8 @@ This is useful for keeping reusable helpers out of the entry point. The embedded
 ## runtime notes
 
 - Scripts must be plain source files. Precompiled Lua bytecode is rejected.
-- Each protected callback has a 1.000.000 instruction count limiter to catch accidental infinite loops.
-- Callbacks run inside the map lifecycle, so reloads recreate script objects and registrations.
+- Each protected callback has a 1.000.000 instruction count limiter to stop infinite loops from hanging the game.
 - Keep expensive work out of `on_update` when a scheduled event or fixed update is enough.
+- Object declarations in events or callbacks other than `on_init` may lead to error spam when moving the playhead backwards.
 
-The [lua api reference](/docs/lua_api.html) is generated from the engine's registrations and is the authoritative list of available classes, methods, enums, and callback signatures.
+The [Lua API reference](/docs/lua_api.html) is generated from the engine's registrations and is an exhaustive list of available classes, methods, enums, and callback signatures.
