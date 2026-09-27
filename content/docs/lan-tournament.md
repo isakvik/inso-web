@@ -1,6 +1,6 @@
 ---
 title: Tournament mode
-description: run synchronized play across multiple clients
+description: synchronized play across multiple clients
 order: 30
 ---
 

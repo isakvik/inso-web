@@ -1,6 +1,6 @@
 ---
 title: Command reference
-description: available inso flags and edit mode keys
+description: available inso flags and edit mode hotkey legend
 order: 40
 ---
 

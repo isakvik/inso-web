@@ -99,6 +99,178 @@ const setupSectionNavigation = ({ sectionSelector, linkSelector, sectionClassPre
     showSectionFromHash();
 };
 
+const revealShaderLoading = () => {
+    document.querySelector(".shader-loading")?.classList.add("is-ready");
+};
+
+const setupCloudShader = async () => {
+    let hasFinishedLoading = false;
+    const loadingTimeout = window.setTimeout(revealShaderLoading, 6000);
+    const finishLoading = () => {
+        if (hasFinishedLoading) {
+            return;
+        }
+
+        hasFinishedLoading = true;
+        window.clearTimeout(loadingTimeout);
+        window.requestAnimationFrame(revealShaderLoading);
+    };
+    const canvas = document.querySelector(".cloud-shader");
+
+    if (!canvas) {
+        finishLoading();
+        return;
+    }
+
+    const response = await fetch("./res/cloud-shader.glsl");
+
+    if (!response.ok) {
+        finishLoading();
+        return;
+    }
+
+    const fragmentSource = await response.text();
+    const gl = canvas.getContext("webgl", {
+        alpha: true,
+        antialias: false,
+        depth: false,
+        premultipliedAlpha: false,
+        stencil: false,
+    });
+
+    if (!gl) {
+        finishLoading();
+        return;
+    }
+
+    const compileShader = (type, source) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            gl.deleteShader(shader);
+            return null;
+        }
+
+        return shader;
+    };
+
+    const vertexShader = compileShader(
+        gl.VERTEX_SHADER,
+        `attribute vec2 a_position;
+
+void main() {
+    gl_Position = vec4(a_position, 0.0, 1.0);
+}`,
+    );
+    const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+
+    if (!vertexShader || !fragmentShader) {
+        finishLoading();
+        return;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        finishLoading();
+        return;
+    }
+
+    const positionLocation = gl.getAttribLocation(program, "a_position");
+    const resolutionLocation = gl.getUniformLocation(program, "iResolution");
+    const timeLocation = gl.getUniformLocation(program, "iTime");
+    const positionBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+        gl.STATIC_DRAW,
+    );
+    gl.useProgram(program);
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.clearColor(0, 0, 0, 0);
+
+    const resizeCanvas = () => {
+        const area = Math.max(1, canvas.clientWidth * canvas.clientHeight);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 0.35, Math.sqrt(200000 / area));
+        const width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio));
+        const height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio));
+
+        if (canvas.width === width && canvas.height === height) {
+            return;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        gl.viewport(0, 0, width, height);
+    };
+
+    const render = (time) => {
+        resizeCanvas();
+        gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+        gl.uniform1f(timeLocation, time);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        render(0);
+        finishLoading();
+        window.addEventListener("resize", () => render(0));
+        return;
+    }
+
+    const frameInterval = 1000 / 24;
+    let animationFrame;
+    let lastRenderTime;
+    let startTime;
+    const animate = (timestamp) => {
+        if (lastRenderTime === undefined || timestamp - lastRenderTime >= frameInterval) {
+            startTime ??= timestamp;
+            render((timestamp - startTime) / 1000);
+            finishLoading();
+            lastRenderTime = timestamp;
+        }
+
+        animationFrame = window.requestAnimationFrame(animate);
+    };
+
+    const startAnimation = () => {
+        if (animationFrame === undefined) {
+            animationFrame = window.requestAnimationFrame(animate);
+        }
+    };
+
+    const stopAnimation = () => {
+        if (animationFrame === undefined) {
+            return;
+        }
+
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = undefined;
+    };
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            stopAnimation();
+            return;
+        }
+
+        startTime = undefined;
+        lastRenderTime = undefined;
+        startAnimation();
+    });
+    startAnimation();
+};
+
+setupCloudShader().catch(() => revealShaderLoading());
+
 setupSectionNavigation({
     sectionSelector: ".main-content-views > div",
     linkSelector: '.nav-link[href^="#"]',

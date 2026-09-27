@@ -1,6 +1,6 @@
 ---
 title: Lua guide
-description: connect scripts to events, hitobjects, drawables, and map time
+description: connecting scripts to events, hitobjects, drawables, and map time
 order: 60
 ---
 

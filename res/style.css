@@ -9,9 +9,10 @@
 }
 
 :root {
-    --bg: #181518;
+    --bg: #131113;
     --bg-light: hsla(280, 20%, 40%, 0.11);
     --panel: #1e1b23;
+    --main-panel: hsla(270, 25%, 35%, 0.11);
     --text: hsl(250, 10%, 90%);
     --muted: #8b91a0;
     --dlhover: hsl(280, 25%, 40%);
@@ -46,6 +47,60 @@ body {
     font-family: "Noto Mono";
 }
 
+.main-page {
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+}
+
+.shader-loading {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    background: #000;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 300ms ease-out;
+}
+
+.shader-loading.is-ready {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cloud-shader {
+    position: fixed;
+    z-index: -1;
+    top: -12vmax;
+    left: -12vmax;
+    display: block;
+    width: calc(100% + 24vmax);
+    height: calc(100% + 24vmax);
+    pointer-events: none;
+    opacity: 0.64;
+    transform-origin: center;
+    will-change: transform;
+}
+
+@keyframes cloud-shader-drift {
+    from {
+        transform: translate3d(-1.5%, -1%, 0) scale(1.02);
+    }
+    to {
+        transform: translate3d(1.5%, 1%, 0) scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shader-loading {
+        transition: none;
+    }
+
+    .cloud-shader {
+        animation: none;
+    }
+}
+
 code {
     color: var(--light);
     font-family: "Noto Mono", monospace;
@@ -72,26 +127,33 @@ a {
     min-height: 70vh;
     max-height: 70vh;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 3rem 1.25rem;
-    background: var(--panel);
+    background: var(--main-panel);
 }
 
 .main-content-views {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     width: 100%;
     max-width: 900px;
+    height: calc(70vh - 6rem);
     margin: auto;
 }
 
 .main-content-views > div {
     grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
     min-width: 0;
-    transition: opacity 180ms ease;
+    min-height: 0;
 }
 
-.main-content-views > div:not([hidden]) {
-    margin-block: auto;
+.main-content-views > div::after {
+    content: "";
+    flex: 0 0 2rem;
 }
 
 .main-content-views > div.is-entering,
@@ -103,6 +165,10 @@ a {
     margin: 2em auto;
     width: 100%;
     max-width: 576px;
+}
+
+.home-download {
+    margin-bottom: 0.5em;
 }
 
 .home-download a {
@@ -142,6 +208,7 @@ a {
     display: grid;
     gap: 0.85rem;
     text-align: left;
+    margin-bottom: 0.5em;
 }
 
 .download-option {
@@ -234,6 +301,10 @@ a {
         min-height: 0;
         max-height: none;
         padding: 2rem 1rem;
+    }
+
+    .main-content-views {
+        height: calc(100svh - 4rem);
     }
 
     .home-gallery {

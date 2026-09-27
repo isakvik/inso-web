@@ -1,6 +1,6 @@
 ---
 title: Shader guide
-description: register pipelines, draw custom effects, and build post-processing
+description: defining pipelines, drawing custom effects, and post-processing
 order: 50
 ---
 
