@@ -4,7 +4,7 @@ description: configure map behavior with an .inso file
 order: 20
 ---
 
-An `.inso` file adds inso-specific behavior to an osu! mapset. It is a plain text file with colon-separated values and named entries.
+An `.inso` file adds inso-specific behavior to an osu! mapset. It is a plain text file with colon-separated values and named entries. A mapset should contain one `.inso` file; if multiple files are present, a later file encountered while walking the mapset replaces the earlier configuration, and the walk order should not be relied on.
 
 ```text
 inso file format v1
@@ -20,13 +20,13 @@ FragmentShader: background.fs.glsl
 BlendMode: Alpha
 ```
 
-All sections are optional. Filenames and resource names are resolved from the mapset folder. The sections can be used together to build a scripted map, a post-processing chain, or a map that only changes gameplay settings.
+All sections are optional. Filenames and resource names are resolved from the mapset folder. The sections can be used together to build a scripted map, a post-processing chain, or a map that only changes gameplay settings. The `v1` preamble identifies this format for readers; current main does not use it to select parser behavior.
 
 ## general
 
 | key | description |
 | --- | --- |
-| `LuaEntryPoint` | The Lua file to run for the map. Use a filename such as `main.lua`; paths are not accepted. |
+| `LuaEntryPoint` | The Lua file to run for the map. Use a single filename such as `main.lua`; path separators and drive-prefix characters are rejected. |
 | `BackgroundPipeline` | The shader pipeline used for the map background. |
 | `DoubleMouse` | A non-zero value enables the special dual-mouse input mode. |
 | `Backbuffer` | A non-zero value enables a full-frame backbuffer that can be sampled by post-processing passes. |
@@ -101,4 +101,4 @@ Assign script-readable bit flags to hitobjects by their exact start time:
 2000,4
 ```
 
-Values can be decimal, hexadecimal, or binary. Lua filtering safely supports up to 53 bits because every Lua number literal becomes a floating point number.
+Values can be decimal, hexadecimal, or binary. When multiple hitobjects share a start time, the timestamp lookup selects the first one. Repeated rows for the same timestamp overwrite that selected object's mask. Lua filtering safely supports up to 53 bits because every Lua number literal becomes a floating point number.

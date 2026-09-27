@@ -14,7 +14,7 @@ Shader work in inso usually has three parts:
 2. Write a vertex and fragment shader using the interface for the pipeline you are replacing.
 3. Create an `Element`, `Drawable`, or post pass that refers to the pipeline by name.
 
-Shader files and map assets are watched while a map is open, so a compileable edit is picked up without restarting the game.
+Shader files and map assets are watched while a map is open in editor or waiting mode, so a compilable edit is picked up without restarting the game.
 
 ## a first quad shader
 
@@ -69,7 +69,7 @@ void main() {
 }
 ```
 
-The bindless and non-bindless branches are both required. inso tries the bindless variant when the graphics driver supports it and falls back to the array of sampler uniforms otherwise.
+The bindless and non-bindless branches are both required. inso tries the bindless variant when the graphics driver supports it and falls back to the array of sampler uniforms otherwise. Some integrated GPUs disable bindless up front, so the non-bindless branch must remain valid even when the shader was authored on a discrete GPU.
 
 Select the pipeline from Lua and put it on a drawable:
 
@@ -103,7 +103,7 @@ layout(std140, binding = 3) uniform globalData {
 | value | meaning |
 | --- | --- |
 | `time` | Current music time in milliseconds |
-| `cursorPos` | Cursor position in playfield coordinates |
+| `cursorPos` | Cursor position in window pixel coordinates, in the same space as `resolution` |
 | `resolution` | Window size in pixels |
 | `playfieldTransform` | The current playfield transform matrix |
 
@@ -235,7 +235,7 @@ function on_init()
 end
 ```
 
-2d quads use a flat depth plane, so a 3d mesh should render into its own depth-cleared target instead of competing with the normal playfield depth buffer. Mesh vertices must match the packed buffer layout used by the loader.
+2d quads use a flat depth plane, so a 3d mesh should render into its own depth-cleared target instead of competing with the normal playfield depth buffer. Mesh vertices must match the packed buffer layout used by the loader: eight scalar values per vertex in `position.xyz`, `normal.xyz`, `uv.xy` order.
 
 ## validate before sharing
 

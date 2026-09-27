@@ -396,10 +396,11 @@ footer {
 
 .docs-sidebar .docs-tree-root {
     display: inline-block;
-    padding: 0.08rem 0.35rem 0.5rem;
+    padding: 0.35rem;
     margin-left: -0.45rem;
     margin-bottom: 0.35rem;
     font: 1em "OCR-A";
+    line-height: 1.2;
     text-decoration: none;
 }
 
@@ -423,20 +424,20 @@ footer {
     background: linear-gradient(var(--line), var(--line)) 0.3rem 0 / 1px calc(100% - 0.9rem) no-repeat;
 }
 
-.docs-sidebar nav ul {
+.docs-tree-nav ul {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.docs-sidebar nav ul ul {
-    margin-top: 0.35rem;
+.docs-tree-nav ul ul {
+    margin-top: 0.5rem;
     padding-left: 0.8rem;
 }
 
-.docs-sidebar nav li {
+.docs-tree-nav li {
     min-width: 0;
 }
 
@@ -484,6 +485,10 @@ footer {
     background: var(--bg-light);
 }
 
+
+.docs-tree-nav a {
+    display: block;
+}
 
 .docs-sidebar nav a::before {
     content: "";

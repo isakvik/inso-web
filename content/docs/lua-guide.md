@@ -53,12 +53,13 @@ The most common callbacks are:
 | `on_beat(beat)` | When playback crosses a beat |
 | `on_timing_change(beat, bpm)` | When an uninherited timing point becomes active |
 | `on_pause_change(paused)` | When playback pauses or resumes |
+| `on_cursor_moved(x, y)` | When the cursor moves, with coordinates in playfield `osupx` space |
 | `on_judgement(hitobject, judgement, timing_error_ms)` | When an object receives a judgement |
 | `on_map_complete()` | When the last scoring object has been judged |
 
 Use `on_update` for frame-based visual motion. Use `on_fixed_update` for simulation that should be reproducible across frame rates. Declaring `on_fixed_update` also moves scheduled callbacks onto the fixed clock.
 
-The complete event list, signatures, and class reference are in the generated [lua api](/docs/lua_api.html).
+The complete event list, signatures, and class reference are in the generated [lua api](/docs/lua_api.html). `on_cursor_moved(x, y)` and `get_cursor_pos()` use playfield `osupx` coordinates. Convert screen pixels with `Window.px_to_osupx()` when needed.
 
 ## beat-driven visuals
 

@@ -23,7 +23,7 @@ Maps and skins outside the normal folders can be opened with the **open external
 
 ## map author workflow
 
-Make the map in stable, open it in inso with **open external**, and keep the map folder open in your editor. Relevant changes are watched while the map is open: Lua scripts and shaders reload, while map and asset changes reopen the beatmap.
+Make the map in stable, open it in inso with **open external**, and keep the map folder open in your editor. Relevant changes are watched while the map is open in editor or waiting mode: Lua scripts and shaders reload, while map and asset changes reopen the beatmap. File changes are not processed while the game is in play mode.
 
 ```text
 songs/

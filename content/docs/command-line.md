@@ -10,7 +10,7 @@ The game accepts a small set of startup flags. Unknown flags are ignored, and th
 
 | flag | effect |
 | --- | --- |
-| `--tournament [path]` | Starts the tournament client. An optional map or song folder path can be loaded at startup. |
+| `--tournament <path>` | Starts the tournament client with the map or song folder at `<path>`. The path is required. |
 | `--gen-lua-docs` | Regenerates `docs/lua_api.html` and exits. Run it from the inso folder so the output is written to the expected location. |
 | `--disable-raw-input` | Disables raw input for the process. This can help when debugging with tools that do not handle raw input correctly. |
 
@@ -19,7 +19,7 @@ The game accepts a small set of startup flags. Unknown flags are ignored, and th
 | key | action |
 | --- | --- |
 | `escape` / `space` | Pause or resume playback |
-| `left` / `right` | Scrub backward or forward by one grid step |
+| `left` / `right` | Scrub backward or forward by one grid step (one quarter beat at the current timing point) |
 | `ctrl+left` / `ctrl+right` | Jump to the previous or next bookmark |
 | `ctrl+o` | Open a beatmap file |
 | `ctrl+c` | Copy the playhead time in milliseconds |
@@ -31,7 +31,7 @@ The game accepts a small set of startup flags. Unknown flags are ignored, and th
 | `shift+r` | Reload the beatmap and its assets |
 | `z` | Jump to the first hitobject, or to the map start if already there |
 | `home` | Reset playback rate to 1x |
-| `pageup` / `pagedown` | Speed up or slow down playback |
-| mouse scroll | Scrub along the beat grid |
+| `pageup` / `pagedown` | Speed up or slow down playback in 1.5x steps |
+| mouse scroll | Scrub along the beat grid; scroll up moves backward |
 
 The broadcaster used for synchronized play is documented in [tournament mode](lan-tournament.md).

@@ -33,13 +33,12 @@ fi
 LINUX_DOWNLOAD_URL=
 WINDOWS_DOWNLOAD_URL=
 RELEASE_PAGE_URL=
-LUA_API_ARCHIVE_URL=
+LUA_API_URL="${LUA_API_URL:-https://raw.githubusercontent.com/$GAME_REPO/main/docs/lua_api.html}"
 
 RELEASE_BASE="https://github.com/$GAME_REPO/releases/download/$RELEASE_TAG"
 LINUX_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-linux-x64.zip"
 WINDOWS_DOWNLOAD_URL="$RELEASE_BASE/inso-${VERSION}-windows-x64.zip"
 RELEASE_PAGE_URL="https://github.com/$GAME_REPO/releases/tag/$RELEASE_TAG"
-LUA_API_ARCHIVE_URL="$LINUX_DOWNLOAD_URL"
 
 check_release_asset() {
     local platform="$1"
@@ -75,23 +74,17 @@ fi
 
 "$DOCS_GENERATOR" "$SITE_DIR/content/docs" "$OUT_DIR"
 
-if [[ -n "$LUA_API_ARCHIVE_URL" ]]; then
-    release_archive=$(mktemp)
-    trap 'rm -f "$release_archive"' EXIT
-    echo "[gen] fetching generated lua docs"
-    curl -fsSL "$LUA_API_ARCHIVE_URL" -o "$release_archive"
-    if ! unzip -Z1 "$release_archive" | grep -Fx 'docs/lua_api.html' >/dev/null; then
-        echo "[gen] error: release archive does not contain docs/lua_api.html" >&2
-        exit 1
-    fi
-    if ! unzip -p "$release_archive" docs/lua_api.html > "$OUT_DIR/docs/lua_api.html"; then
-        echo "[gen] error: could not extract docs/lua_api.html" >&2
+if [[ -n "$LUA_API_URL" ]]; then
+    echo "[gen] fetching generated lua docs from $LUA_API_URL"
+    if ! curl -fsSL --retry 3 --retry-delay 1 "$LUA_API_URL" -o "$OUT_DIR/docs/lua_api.html"; then
+        echo "[gen] error: could not fetch generated lua docs: $LUA_API_URL" >&2
         exit 1
     fi
     if [[ ! -s "$OUT_DIR/docs/lua_api.html" ]]; then
-        echo "[gen] error: extracted docs/lua_api.html is empty" >&2
+        echo "[gen] error: fetched docs/lua_api.html is empty" >&2
         exit 1
     fi
+    sed -i 's/with the new position in screen pixels\./with the new position in playfield (osupx) coordinates\./' "$OUT_DIR/docs/lua_api.html"
 fi
 
 if [[ -d "$SITE_DIR/downloads/maps" ]]; then

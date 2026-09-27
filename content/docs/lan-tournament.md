@@ -14,7 +14,9 @@ On each computer, open the same map and start the client in tournament mode:
 inso --tournament songs/my-map/
 ```
 
-The map is loaded and prepared before the start signal arrives. Each client listens for UDP packets on port `8727`. The optional path can be omitted when the client should use its normal startup selection.
+The path is required in tournament mode because the client has no map-selection fallback there. Use the same `.osu` file or map folder on every client. The map is loaded and prepared before the start signal arrives, and each client listens for UDP packets on port `8727`.
+
+Allow inbound UDP traffic on port `8727` through each client's firewall. The default `255.255.255.255` target may be blocked by network equipment; use the broadcast address for the local subnet when needed.
 
 ## send a start signal
 
@@ -24,6 +26,14 @@ Run `inso_lan_broadcast` on a computer that can reach the clients:
 inso_lan_broadcast start
 inso_lan_broadcast start 192.168.1.255 500
 ```
+
+The broadcaster is a separate tool from the game client. If it is not included in your package, build it from a current main checkout with Odin:
+
+```text
+odin build tools/inso_lan_broadcast -out:inso_lan_broadcast -o:speed
+```
+
+Run the resulting executable from the repository or build directory. The broadcaster sends only a start or abort command and does not identify the map, so verify the map and game build on every client before starting.
 
 The default target is `255.255.255.255` and the default wait is `250` ms. The wait gives the packet time to reach every client before the start is scheduled. A signal is sent four times with a short gap between packets so one lost packet does not stop the event.
 
