@@ -249,7 +249,9 @@ a {
 }
 
 .download-button:hover,
-.download-button:focus-visible {
+.download-button:focus-visible,
+.map-option:has(.map-preview:hover) .download-button,
+.map-option:has(.map-preview:focus-visible) .download-button {
     background: var(--dlhover);
 }
 
@@ -292,6 +294,37 @@ a {
     line-height: 1.7;
 }
 
+.map-option {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+    background: var(--bg);
+}
+
+.map-option .download-button,
+.map-preview {
+    min-height: 10rem;
+}
+
+.map-preview {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+}
+
+.map-preview:focus-visible {
+    outline: 2px solid var(--light);
+    outline-offset: -2px;
+}
+
+.map-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 @media (max-width: 700px) {
     .main {
         margin: clamp(1.5rem, 5vh, 3rem) 0 2rem;
@@ -319,6 +352,19 @@ a {
         min-height: 8rem;
         border-right: 0;
         border-bottom: 1px solid var(--line);
+    }
+
+    .map-option {
+        grid-template-columns: 1fr;
+    }
+
+    .map-option .download-button,
+    .map-preview {
+        min-height: 8rem;
+    }
+
+    .map-preview {
+        border-left: 0;
     }
 
 }

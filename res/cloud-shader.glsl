@@ -109,7 +109,7 @@ void main() {
 
     float coverage = cloudcover + cloudalpha * shape * ridge;
     float cloudAmount = clamp(coverage + detail, 0.0, 1.0);
-    float sideWeight = smoothstep(0.0, 0.88, abs(p.x * 2.0 - 1.0));
+    float sideWeight = smoothstep(0.0, 1.0, abs(p.x * 2.0 - 1.0));
     float density = smoothstep(0.18, 0.78, cloudAmount) * sideWeight;
     float light = clamp(0.35 + detail * 1.8, 0.0, 1.0);
     vec3 cloudColor = mix(vec3(0.36, 0.26, 0.44), vec3(0.0), light);
