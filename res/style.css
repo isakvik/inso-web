@@ -107,9 +107,8 @@ code {
     font-size: inherit;
 }
 
-a {
-    color: var(--text);
-}
+a       { color: var(--light); }
+a:hover { color: var(--text); }
 
 .container {
     display: flex;
@@ -118,14 +117,14 @@ a {
 
 .main {
     flex: 1;
-    margin: 10vh 0 5vh;
+    margin: 5vh 0 2vh;
     scrollbar-color: var(--text) var(--panel);
 }
 
 .main-content {
     text-align: center;
-    min-height: 70vh;
-    max-height: 70vh;
+    min-height: 80vh;
+    max-height: 80vh;
     overflow-y: auto;
     scrollbar-gutter: stable;
     padding: 3rem 1.25rem;
@@ -138,7 +137,7 @@ a {
     grid-template-rows: minmax(0, 1fr);
     width: 100%;
     max-width: 900px;
-    height: calc(70vh - 6rem);
+    height: calc(80vh - 6rem);
     margin: auto;
 }
 
@@ -173,6 +172,10 @@ a {
 
 .home-download a {
     color: var(--light);
+    font-size: 1.2em;
+}
+.home-download a:hover {
+    color: var(--text);
 }
 
 .home-gallery {
@@ -245,6 +248,7 @@ a {
     padding: 1.25rem;
     text-align: center;
     text-decoration: none;
+    color: var(--text);
     box-shadow: inset 0 0 1.2em -0.6em var(--light);
 }
 
